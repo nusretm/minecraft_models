@@ -1,7 +1,7 @@
 # Shared Minecraft Models — Foundation Design
 
 Date: 2026-10-09
-Status: **MOD-1 contract approved and implemented on feature branch; review pending**
+Status: **MOD-1 COMPLETED / PR #2 MERGED on 2026-10-09**
 Repository: `nusretm/minecraft_models`
 Consumers: `nusretm/mtn_launcher`, `nusretm/minecraft_tools/minecraft_loader_version_list`
 
@@ -104,7 +104,7 @@ CHANGELOG.md
 .gitignore
 ```
 
-Suggested Dart SDK `>=3.5.0 <4.0.0` and first development version `0.1.0-dev.1`. No HTTP, filesystem, or Flutter dependency.
+Implemented Dart SDK `>=3.5.0 <4.0.0`, package version `0.1.0-dev.1`. No HTTP, filesystem, or Flutter dependency. Authoritative fixed implementation ref: `51aad868649d4c147f5a4645e2c92111a6cae44e`.
 
 ## Deliberately excluded
 
@@ -124,4 +124,4 @@ Suggested Dart SDK `>=3.5.0 <4.0.0` and first development version `0.1.0-dev.1`.
 - Verify Windows `dart pub get`, `dart analyze`, `dart test`, and `git diff --check`.
 - User approves implementation and later PR merge separately. Pin a fixed Git commit/tag in VersionList, then migrate Launcher in another checkpoint.
 
-VersionList PR #57 and its five-provider examples are **not** declared ready or tested by this documentation change.
+MOD-1 code was merged through [PR #2](https://github.com/nusretm/minecraft_models/pull/2). User Windows evidence: analyzer clean, 14/14 tests passed. The VersionList draft PR #57 and its five-provider examples are **not** declared ready or tested by this documentation change. No models Git tag was created.

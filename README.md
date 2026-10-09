@@ -45,5 +45,4 @@ değerlerini değiştirmeden saklar.
 
 ## Proje durumu
 
-MOD-1 foundation modelleri feature branch üzerinde uygulanmıştır. Commit, PR,
-merge ve tüketici repository entegrasyonları ayrı onaya tabidir.
+MOD-1 foundation modelleri [PR #2](https://github.com/nusretm/minecraft_models/pull/2) ile `main` branch'ine merge edilmiştir. Sabit tüketici dependency ref'i: `51aad868649d4c147f5a4645e2c92111a6cae44e`. `minecraft_loader_version_list` ve MTN Launcher entegrasyonları ayrı onaya tabidir.

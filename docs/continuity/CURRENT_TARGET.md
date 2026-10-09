@@ -3,9 +3,9 @@
 Date: 2026-10-09
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
-Baseline `main` HEAD: `a4139746927902770c8f09eeeba41e3d02216c98`
-Implementation branch: `feature/mod-1-model-foundation`
-Status: **MOD-1 foundation implemented and locally validated — review pending**
+Accepted `main` HEAD at MOD-1 merge: `51aad868649d4c147f5a4645e2c92111a6cae44e`
+Merged implementation commit: `82f577466534c70d9a07da89877a415f73c5416d` (PR #2)
+Status: **MOD-1 COMPLETE / MERGED — consumer migration pending**
 
 ## Authoritative files
 
@@ -30,21 +30,19 @@ non-empty `mcVersion`, `version`, `url`, and `type` strings. An absent `channel`
 maps to `unknown`; explicit invalid values are rejected. Serialization always
 writes the channel. Exact IDs and URLs are preserved without normalization.
 
-`MtnLauncherGameVersion` comparison model is deferred for separate review; no changes to release ordering semantics or launcher runtime in DOC-0.
+`MtnLauncherGameVersion` comparison model remains deferred for separate review; no changes to release ordering semantics or launcher runtime in MOD-1.
 
 ## Related repositories and checkpoints
 
 - `nusretm/mtn_launcher`: Forge V1-B1 already merged; V1-B2 trust/source acquisition and V1-B3 TaskList remain separately gated.
-- `nusretm/minecraft_tools`: VersionList `feature/minecraft-loader-version-list-foundation`, PR #57, is a later consumer migration. Its current in-package model definitions are retained until the fixed shared model dependency is ready.
+- `nusretm/minecraft_tools`: VersionList `feature/minecraft-loader-version-list-foundation`, draft PR #57, is the next separately approved consumer migration. Its current in-package model definitions stay unchanged until that work starts. Pin shared models to Git SHA `51aad868649d4c147f5a4645e2c92111a6cae44e`.
 - The VersionList API owns catalog/cache/metadata/selection, not this package.
 - CLI future goal: `--loader fabric` resolves a compatible default build, `--loader-ver` selects one exact full build. That selection algorithm is **outside** the shared value models.
 
 ## Validation and current checkpoint
 
-- Windows validation passed: `dart pub get`, `dart analyze`, and `dart test` (14 tests).
-- Final diff hygiene is checked with `git diff --check`, `git diff --stat`, and `git status`.
-- Inspect the complete feature-branch diff before any commit or PR.
-- Commit, PR, tag, merge, and consumer migration each remain separately gated.
-- After an approved fixed Git SHA/tag exists, migrate VersionList first and MTN Launcher later.
-
-**No commit, PR, tag, merge, or consumer dependency migration is authorized by MOD-1 implementation approval.**
+- User reported Windows `dart pub get` PASS, `dart analyze` **No issues found**, `dart test` **14/14 PASS**, and Git diff checks clean; no independent GitHub CI run is claimed.
+- The full twelve-file PR #2 diff was reviewed; public barrel, immutable model, missing-vs-invalid channel, exact IDs/URLs, display-only text, equality and tests matched approved contracts.
+- PR #2 merged into `main` on 2026-10-09 at commit `51aad868649d4c147f5a4645e2c92111a6cae44e`. This commit is the fixed dependency ref; no Git tag was created.
+- MOD-1 code implementation is complete. Remaining work: separately approve VersionList migration in `minecraft_tools` and then MTN Launcher integration.
+- This docs-only closing checkpoint does not implement or authorize changes in any consumer repository.
