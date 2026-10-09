@@ -9,6 +9,7 @@ final class MtnLauncherGameLoaderVersion {
     required this.url,
     required this.type,
     this.channel = MtnLauncherGameLoaderChannel.unknown,
+    this.sha1,
   });
 
   /// The Minecraft version family associated with this loader build.
@@ -28,6 +29,11 @@ final class MtnLauncherGameLoaderVersion {
   /// The loader build publication channel.
   final MtnLauncherGameLoaderChannel channel;
 
+  /// Optional SHA-1 of the source bytes at [url] (e.g. a version profile).
+  /// Raw source metadata only: no validation of downloaded bytes happens here.
+  /// Null means the provider did not declare an SHA-1.
+  final String? sha1;
+
   /// A shortened display value that never replaces [version] as identity.
   String get text {
     final prefix = '$mcVersion-';
@@ -46,6 +52,7 @@ final class MtnLauncherGameLoaderVersion {
     'url': url,
     'type': type.name,
     'channel': channel.name,
+    if (sha1 != null) 'sha1': sha1!,
   };
 
   /// Creates a loader build from the package's JSON representation.
@@ -69,12 +76,15 @@ final class MtnLauncherGameLoaderVersion {
       channel = MtnLauncherGameLoaderChannel.unknown;
     }
 
+    final String? sourceSha1 = json.containsKey('sha1') ? _requiredString(json, 'sha1') : null;
+
     return MtnLauncherGameLoaderVersion(
       mcVersion: mcVersion,
       version: version,
       url: url,
       type: type,
       channel: channel,
+      sha1: sourceSha1,
     );
   }
 
@@ -101,14 +111,15 @@ final class MtnLauncherGameLoaderVersion {
             other.version == version &&
             other.url == url &&
             other.type == type &&
-            other.channel == channel;
+            other.channel == channel &&
+            other.sha1 == sha1;
   }
 
   @override
-  int get hashCode => Object.hash(mcVersion, version, url, type, channel);
+  int get hashCode => Object.hash(mcVersion, version, url, type, channel, sha1);
 
   @override
   String toString() {
-    return 'MtnLauncherGameLoaderVersion(mcVersion: $mcVersion, version: $version, url: $url, type: ${type.name}, channel: ${channel.name})';
+    return 'MtnLauncherGameLoaderVersion(mcVersion: $mcVersion, version: $version, url: $url, type: ${type.name}, channel: ${channel.name}, sha1: $sha1)';
   }
 }

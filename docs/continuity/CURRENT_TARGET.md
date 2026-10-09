@@ -1,11 +1,19 @@
 # Current Target — minecraft_models
 
-Date: 2026-10-09
+Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
-Baseline `main` HEAD: `a4139746927902770c8f09eeeba41e3d02216c98`
-Implementation branch: `feature/mod-1-model-foundation`
-Status: **MOD-1 foundation implemented and locally validated — review pending**
+Current `main` HEAD: `6791f0b4ea36f7e7053084d6e96bfa52b0369918`
+Active checkpoint: **LVL-I3A optional source SHA-1 metadata — Windows validated, commit/merge pending**
+Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
+
+## LVL-I3A — Optional source SHA-1 metadata (2026-10-10)
+
+- **Approved by user for implementation** as a bounded upstream model contract needed by MtnLauncher Vanilla VersionList migration.
+- Implemented and Windows validated (analyzer clean, focused 7/7, full 21/21, diff check passed) on baseline main `6791f0b4ea36f7e7053084d6e96bfa52b0369918`.
+- Extend existing immutable `MtnLauncherGameLoaderVersion` with optional `String? sha1`: exact provider-provided source checksum metadata associated with `url`. Keep `const` constructor, required values, type, channel and URL identity unchanged. Absent `sha1` => null; `toJson` only emits the key when non-null; explicitly malformed JSON `sha1` fails as `FormatException`. Equality and hashCode include the field.
+- No byte hashing, digest trust, downloader, VersionList provider callbacks, cache IO changes, MtnLauncher application changes or sibling repository commits in this checkpoint. `minecraft_loader_version_list` already delegates item serialization to model `toJson/fromJson` but remains pinned to an older model SHA until a separately validated consumer dependency update.
+- Full bounded design/acceptance details: `LVL_I3A_SOURCE_SHA1_METADATA.md`. Do not claim source integrity verification or successful consumer integration from model tests alone.
 
 ## Authoritative files
 
@@ -39,7 +47,7 @@ writes the channel. Exact IDs and URLs are preserved without normalization.
 - The VersionList API owns catalog/cache/metadata/selection, not this package.
 - CLI future goal: `--loader fabric` resolves a compatible default build, `--loader-ver` selects one exact full build. That selection algorithm is **outside** the shared value models.
 
-## Validation and current checkpoint
+## Historical MOD-1 validation and checkpoint
 
 - Windows validation passed: `dart pub get`, `dart analyze`, and `dart test` (14 tests).
 - Final diff hygiene is checked with `git diff --check`, `git diff --stat`, and `git status`.

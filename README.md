@@ -41,9 +41,12 @@ import 'package:minecraft_models/minecraft_models.dart';
 İlk foundation API'si Minecraft sürüm tipini, loader tarafından desteklenen
 Minecraft sürümü named record'unu, loader build channel enum'unu ve immutable
 loader build modelini içerir. Loader build modeli exact upstream version ve URL
-değerlerini değiştirmeden saklar.
+değerlerini değiştirmeden saklar. LVL-I3A kapsamında isteğe bağlı kaynak SHA-1
+metadata'sı da JSON üzerinden kayıpsız taşınır; dosya indirimi veya checksum
+doğrulaması bu saf value modelinin sorumluluğu değildir.
 
 ## Proje durumu
 
-MOD-1 foundation modelleri feature branch üzerinde uygulanmıştır. Commit, PR,
-merge ve tüketici repository entegrasyonları ayrı onaya tabidir.
+MOD-1 foundation modeli `main` branch'indedir. LVL-I3A kaynak SHA-1 metadata
+değişikliği Windows doğrulamasını ve testlerini geçmiştir; commit ve merge onayı beklenmektedir.
+Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
