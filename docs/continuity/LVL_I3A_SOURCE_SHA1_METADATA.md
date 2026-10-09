@@ -3,11 +3,11 @@
 Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Baseline main: `6791f0b4ea36f7e7053084d6e96bfa52b0369918`
-State: **Windows validation PASSED on 2026-10-10; local feature changes are uncommitted; commit, push, PR and merge require separate approval.**
+State: **Windows validation PASSED on 2026-10-10; feature commit `10d7c02b4a3edc69d3f6f685b1e8384ade38a225` pushed and PR #5 opened; squash merge requires separate user approval.**
 
 ## Evidence and scope
 
-MtnLauncher Vanilla's Mojang catalog carries an optional SHA-1 for the exact profile URL in each version entry. The shared `MtnLauncherGameLoaderVersion` currently stores source `url` but cannot carry SHA-1 through JSON or the VersionList disk cache. Provider-specific side tables would duplicate metadata ownership.
+MtnLauncher Vanilla's Mojang catalog carries an optional SHA-1 for the exact profile URL in each version entry. Before LVL-I3A, the shared `MtnLauncherGameLoaderVersion` stored source `url` but could not carry SHA-1 through JSON or the VersionList disk cache. Provider-specific side tables would duplicate metadata ownership.
 
 Approved LVL-I3A adds exactly one optional value field to the existing shared loader build model:
 
@@ -57,7 +57,10 @@ Expected focused coverage: const model, exact metadata round-trip, historical ab
 - Initial analyzer warning `equal_elements_in_set` corrected.
 - Structural equality now tests distinct model instances.
 - No `dart format` executed.
-- Commit, push, PR and merge: pending separate approval.
+- Commit and push: complete (`10d7c02b4a3edc69d3f6f685b1e8384ade38a225`).
+- Pull request: [#5](https://github.com/nusretm/minecraft_models/pull/5), open; GitHub diff reviewed (6 files, +232/-11, mergeable/clean).
+- Squash merge: **not authorized yet**; separate approval required.
+
 ## Stop condition
 
-Record actual Windows results and independent diff audit before requesting permission to commit and merge. Only then update the VersionList consumer dependency in its separately approved checkpoint.
+Windows validation and independent diff audit are complete. Await explicit squash-merge approval for PR #5. The VersionList consumer dependency update remains a separate checkpoint after this models change is merged.

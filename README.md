@@ -48,5 +48,6 @@ doğrulaması bu saf value modelinin sorumluluğu değildir.
 ## Proje durumu
 
 MOD-1 foundation modeli `main` branch'indedir. LVL-I3A kaynak SHA-1 metadata
-değişikliği Windows doğrulamasını ve testlerini geçmiştir; commit ve merge onayı beklenmektedir.
+değişikliği Windows doğrulamasını ve testlerini geçmiştir; commit ve push tamamlanmış,
+PR #5 açıktır ve squash merge için ayrı onay beklenmektedir.
 Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
