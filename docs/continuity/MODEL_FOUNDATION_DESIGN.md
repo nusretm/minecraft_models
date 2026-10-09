@@ -1,7 +1,7 @@
 # Shared Minecraft Models — Foundation Design
 
 Date: 2026-10-09
-Status: **Design only / requires approval before implementation**
+Status: **MOD-1 contract approved and implemented on feature branch; review pending**
 Repository: `nusretm/minecraft_models`
 Consumers: `nusretm/mtn_launcher`, `nusretm/minecraft_tools/minecraft_loader_version_list`
 
@@ -11,7 +11,7 @@ The same Minecraft game version type is currently defined by both consumers. Equ
 
 Architecture: `minecraft_models` is a leaf dependency used by both consumers. The VersionList may additionally be depended on by Launcher. The models package must never import Launcher or VersionList.
 
-## Four foundation model proposals
+## Four foundation models
 
 ### MtnLauncherGameVersionType
 
@@ -64,7 +64,7 @@ An upstream source without channel metadata yields `unknown`, not `stable`. Prov
 
 ### MtnLauncherGameLoaderVersion
 
-Move the current simple immutable VersionList build model here and retain:
+The shared immutable loader build model retains:
 - `String mcVersion`
 - `String version`: full upstream loader build identifier, never a shortened display label
 - `String url`: preserved provider-defined source URL; potentially manifest JSON, profile JSON, or installer JAR
@@ -72,10 +72,21 @@ Move the current simple immutable VersionList build model here and retain:
 - New `MtnLauncherGameLoaderChannel channel`: loader build channel, explicit default `unknown`
 - `text`: derived display convenience only; never use it as download/version identity
 - `toJson` / `fromJson`: preserve exact identity, URL, type and channel through round-trips
+- structural equality and `hashCode` over all five stored fields
 
-Confirm missing/invalid-field policy before implementation. Existing VersionList cached JSON without channel must either map explicitly to `unknown` or be invalidated by VersionList cache schema, never silently become stable.
+`fromJson` requires non-empty, non-whitespace `mcVersion`, `version`, `url`, and
+`type` strings. Missing, null, wrong-type, empty, whitespace-only, and unknown
+enum values throw `FormatException`. `channel` is the sole missing-field
+exception: absence maps to `unknown`, while an explicit null, wrong type, empty,
+whitespace-only, or unknown value throws. Extra JSON fields are ignored and
+`toJson` always writes `channel`.
 
-## Proposed Dart package layout
+The accepted strings are returned unchanged; validation does not trim, change
+case, parse, shorten, or reconstruct upstream values. `text` removes at most one
+exact `"$mcVersion-"` prefix or, otherwise, one exact `"-$mcVersion"` suffix.
+It never changes `version` itself.
+
+## Dart package layout
 
 ```text
 README.md
@@ -109,6 +120,7 @@ Suggested Dart SDK `>=3.5.0 <4.0.0` and first development version `0.1.0-dev.1`.
 - Named record keeps exact `mcVersion` and `versionId`.
 - Build model JSON round-trips exact full version and URL; channel and game-type fields are independent.
 - Malformed/missing payload rules are consistent; immutable value cannot be mutated.
+- Structural equality includes all stored fields, while `text` remains derived display data.
 - Verify Windows `dart pub get`, `dart analyze`, `dart test`, and `git diff --check`.
 - User approves implementation and later PR merge separately. Pin a fixed Git commit/tag in VersionList, then migrate Launcher in another checkpoint.
 

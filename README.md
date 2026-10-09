@@ -32,13 +32,18 @@ bu davranışlar ilgili uygulamalarda kalmalıdır.
 
 ## Kullanım
 
-Modeller, MTM Launcher ve MTN Minecraft Tools tarafından ortak bağımlılık
-olarak kullanılmak üzere tasarlanmıştır. Bu deponun mevcut halinde henüz
-model, paketleme veya kurulum yapısı bulunmadığından entegrasyon yöntemi,
-kullanılan teknoloji ve sürümleme yaklaşımı belirlendiğinde bu bölüm
-güncellenecektir.
+Paketin tek public API giriş noktası kullanılır:
+
+```dart
+import 'package:minecraft_models/minecraft_models.dart';
+```
+
+İlk foundation API'si Minecraft sürüm tipini, loader tarafından desteklenen
+Minecraft sürümü named record'unu, loader build channel enum'unu ve immutable
+loader build modelini içerir. Loader build modeli exact upstream version ve URL
+değerlerini değiştirmeden saklar.
 
 ## Proje durumu
 
-Proje başlangıç aşamasındadır. İlk modeller, tüketici uygulamaların ihtiyaçları
-ortaklaştırıldıkça eklenecektir.
+MOD-1 foundation modelleri feature branch üzerinde uygulanmıştır. Commit, PR,
+merge ve tüketici repository entegrasyonları ayrı onaya tabidir.
