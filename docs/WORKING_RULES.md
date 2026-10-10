@@ -22,8 +22,8 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 ## Shared model rules
 
 - One semantic type has one implementation. Consumers import or re-export the same Dart type; do not add conversion wrappers for copied enums.
-- `MtnLauncherGameVersionType` describes Minecraft game version type.
-- `MtnLauncherGameLoaderChannel` describes loader-build publication channel; an unknown channel is not automatically stable.
+- `MtnMinecraftGameVersionType` describes Minecraft game version type.
+- `MtnMinecraftGameLoaderChannel` describes loader-build publication channel; an unknown channel is not automatically stable.
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
@@ -31,7 +31,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 
 ## Naming and architecture
 
-- Honor the agreed `MtnLauncher...` public names and put related classes in a clear family.
+- Honor the agreed `MtnMinecraft...` public names and put related classes in a clear family.
 - Keep domain names as enums/value identities, not repeated raw strings, except provider-specific wire format boundaries outside this repository.
 - No provider-specific switches or wire-format constants inside shared models.
 - Do not create additional public models without demonstrated shared demand and approval.

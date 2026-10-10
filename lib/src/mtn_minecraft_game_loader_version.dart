@@ -1,14 +1,14 @@
-import 'mtn_launcher_game_loader_channel.dart';
-import 'mtn_launcher_game_version_type.dart';
+import 'mtn_minecraft_game_loader_channel.dart';
+import 'mtn_minecraft_game_version_type.dart';
 
 /// An immutable loader build for a Minecraft game-version family.
-final class MtnLauncherGameLoaderVersion {
-  const MtnLauncherGameLoaderVersion({
+final class MtnMinecraftGameLoaderVersion {
+  const MtnMinecraftGameLoaderVersion({
     required this.mcVersion,
     required this.version,
     required this.url,
     required this.type,
-    this.channel = MtnLauncherGameLoaderChannel.unknown,
+    this.channel = MtnMinecraftGameLoaderChannel.unknown,
   });
 
   /// The Minecraft version family associated with this loader build.
@@ -23,10 +23,10 @@ final class MtnLauncherGameLoaderVersion {
   final String url;
 
   /// The Minecraft game version type, not the loader publication channel.
-  final MtnLauncherGameVersionType type;
+  final MtnMinecraftGameVersionType type;
 
   /// The loader build publication channel.
-  final MtnLauncherGameLoaderChannel channel;
+  final MtnMinecraftGameLoaderChannel channel;
 
   /// A shortened display value that never replaces [version] as identity.
   String get text {
@@ -48,28 +48,22 @@ final class MtnLauncherGameLoaderVersion {
     'channel': channel.name,
   };
 
-  /// Creates a loader build from the package's JSON representation.
-  ///
-  /// Required strings reject missing, null, non-string, empty, and
-  /// whitespace-only values. A missing `channel` maps to [MtnLauncherGameLoaderChannel.unknown]
-  /// for records created before the field existed; an explicitly invalid value
-  /// is rejected.
-  factory MtnLauncherGameLoaderVersion.fromJson(Map<String, Object?> json) {
+  factory MtnMinecraftGameLoaderVersion.fromJson(Map<String, Object?> json) {
     final mcVersion = _requiredString(json, 'mcVersion');
     final version = _requiredString(json, 'version');
     final url = _requiredString(json, 'url');
     final typeName = _requiredString(json, 'type');
-    final type = _enumByName(typeName, MtnLauncherGameVersionType.values, 'type');
+    final type = _enumByName(typeName, MtnMinecraftGameVersionType.values, 'type');
 
-    final MtnLauncherGameLoaderChannel channel;
+    final MtnMinecraftGameLoaderChannel channel;
     if (json.containsKey('channel')) {
       final channelName = _requiredString(json, 'channel');
-      channel = _enumByName(channelName, MtnLauncherGameLoaderChannel.values, 'channel');
+      channel = _enumByName(channelName, MtnMinecraftGameLoaderChannel.values, 'channel');
     } else {
-      channel = MtnLauncherGameLoaderChannel.unknown;
+      channel = MtnMinecraftGameLoaderChannel.unknown;
     }
 
-    return MtnLauncherGameLoaderVersion(
+    return MtnMinecraftGameLoaderVersion(
       mcVersion: mcVersion,
       version: version,
       url: url,
@@ -96,7 +90,7 @@ final class MtnLauncherGameLoaderVersion {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is MtnLauncherGameLoaderVersion &&
+        other is MtnMinecraftGameLoaderVersion &&
             other.mcVersion == mcVersion &&
             other.version == version &&
             other.url == url &&
@@ -109,6 +103,6 @@ final class MtnLauncherGameLoaderVersion {
 
   @override
   String toString() {
-    return 'MtnLauncherGameLoaderVersion(mcVersion: $mcVersion, version: $version, url: $url, type: ${type.name}, channel: ${channel.name})';
+    return 'MtnMinecraftGameLoaderVersion(mcVersion: $mcVersion, version: $version, url: $url, type: ${type.name}, channel: ${channel.name})';
   }
 }

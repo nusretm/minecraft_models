@@ -16,21 +16,21 @@ Status: **MOD-1 foundation implemented and locally validated — review pending*
 
 ## Project objective
 
-Provide one pure-Dart model identity for the independent `mtn_launcher` and `minecraft_loader_version_list` packages. No duplicate `MtnLauncherGameVersionType` or conversion/alias bridge. No HTTP, caching, provider-specific parsing, UI, or game launch in this package.
+Provide one pure-Dart model identity for the independent `mtn_launcher` and `minecraft_loader_version_list` packages. No duplicate `MtnMinecraftGameVersionType` or conversion/alias bridge. No HTTP, caching, provider-specific parsing, UI, or game launch in this package.
 
 ## Implemented foundation contracts
 
-1. `MtnLauncherGameVersionType` — existing eight-value Minecraft game-version enum.
-2. `MtnLauncherGameLoaderMinecraftVersion` — named record `(mcVersion, versionId, type)` preserving exact upstream ID.
-3. `MtnLauncherGameLoaderChannel` — `stable, beta, alpha, experimental, unknown` for loader build channel.
-4. `MtnLauncherGameLoaderVersion` — exact version, Minecraft game version, provider-defined URL, game version type and loader channel; immutable JSON-capable value with structural equality.
+1. `MtnMinecraftGameVersionType` — existing eight-value Minecraft game-version enum.
+2. `MtnMinecraftGameLoaderMinecraftVersion` — named record `(mcVersion, versionId, type)` preserving exact upstream ID.
+3. `MtnMinecraftGameLoaderChannel` — `stable, beta, alpha, experimental, unknown` for loader build channel.
+4. `MtnMinecraftGameLoaderVersion` — exact version, Minecraft game version, provider-defined URL, game version type and loader channel; immutable JSON-capable value with structural equality.
 
 The loader build constructor defaults `channel` to `unknown`. JSON requires
 non-empty `mcVersion`, `version`, `url`, and `type` strings. An absent `channel`
 maps to `unknown`; explicit invalid values are rejected. Serialization always
 writes the channel. Exact IDs and URLs are preserved without normalization.
 
-`MtnLauncherGameVersion` comparison model is deferred for separate review; no changes to release ordering semantics or launcher runtime in DOC-0.
+`MtnMinecraftGameVersion` comparison model is deferred for separate review; no changes to release ordering semantics or launcher runtime in DOC-0.
 
 ## Related repositories and checkpoints
 

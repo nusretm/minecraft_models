@@ -8,3 +8,5 @@ environment:
 
 dev_dependencies:
   test: ^1.25.8
+dependencies:
+  http: ^1.6.0

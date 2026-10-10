@@ -1,5 +1,5 @@
 /// The Minecraft game release type, independent of loader-build stability.
-enum MtnLauncherGameVersionType {
+enum MtnMinecraftGameVersionType {
   release,
   snapshot,
   preRelease,

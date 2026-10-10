@@ -13,12 +13,12 @@ Architecture: `minecraft_models` is a leaf dependency used by both consumers. Th
 
 ## Four foundation models
 
-### MtnLauncherGameVersionType
+### MtnMinecraftGameVersionType
 
 Keep the exact existing cases, unchanged:
 
 ```dart
-enum MtnLauncherGameVersionType {
+enum MtnMinecraftGameVersionType {
   release,
   snapshot,
   preRelease,
@@ -32,26 +32,26 @@ enum MtnLauncherGameVersionType {
 
 This denotes the *Minecraft game's* version type, **not** loader stability.
 
-### MtnLauncherGameLoaderMinecraftVersion
+### MtnMinecraftGameLoaderMinecraftVersion
 
 Keep the current named-record type from VersionList:
 
 ```dart
-typedef MtnLauncherGameLoaderMinecraftVersion = ({
+typedef MtnMinecraftGameLoaderMinecraftVersion = ({
   String mcVersion,
   String versionId,
-  MtnLauncherGameVersionType type,
+  MtnMinecraftGameVersionType type,
 });
 ```
 
 `mcVersion` groups logically selected game versions; `versionId` is the exact original upstream ID. Do not claim a week-numbered snapshot belongs to a particular release without authoritative mapping.
 
-### MtnLauncherGameLoaderChannel
+### MtnMinecraftGameLoaderChannel
 
 New enum for *loader build* channel:
 
 ```dart
-enum MtnLauncherGameLoaderChannel {
+enum MtnMinecraftGameLoaderChannel {
   stable,
   beta,
   alpha,
@@ -62,14 +62,14 @@ enum MtnLauncherGameLoaderChannel {
 
 An upstream source without channel metadata yields `unknown`, not `stable`. Provider-specific classification and latest/preferred selection logic stay outside this package.
 
-### MtnLauncherGameLoaderVersion
+### MtnMinecraftGameLoaderVersion
 
 The shared immutable loader build model retains:
 - `String mcVersion`
 - `String version`: full upstream loader build identifier, never a shortened display label
 - `String url`: preserved provider-defined source URL; potentially manifest JSON, profile JSON, or installer JAR
-- `MtnLauncherGameVersionType type`: Minecraft game-version type
-- New `MtnLauncherGameLoaderChannel channel`: loader build channel, explicit default `unknown`
+- `MtnMinecraftGameVersionType type`: Minecraft game-version type
+- New `MtnMinecraftGameLoaderChannel channel`: loader build channel, explicit default `unknown`
 - `text`: derived display convenience only; never use it as download/version identity
 - `toJson` / `fromJson`: preserve exact identity, URL, type and channel through round-trips
 - structural equality and `hashCode` over all five stored fields
@@ -95,10 +95,11 @@ docs/continuity/CURRENT_TARGET.md
 docs/continuity/MODEL_FOUNDATION_DESIGN.md
 pubspec.yaml
 lib/minecraft_models.dart
-lib/src/mtn_launcher_game_version_type.dart
-lib/src/mtn_launcher_game_loader_minecraft_version.dart
-lib/src/mtn_launcher_game_loader_channel.dart
-lib/src/mtn_launcher_game_loader_version.dart
+lib/src/mtn_minecraft_game_version_type.dart
+lib/src/mtn_minecraft_game_loader_minecraft_version.dart
+lib/src/mtn_minecraft_game_loader_minecraft_version_list.dart
+lib/src/mtn_minecraft_game_loader_channel.dart
+lib/src/mtn_minecraft_game_loader_version.dart
 test/minecraft_models_test.dart
 CHANGELOG.md
 .gitignore
@@ -108,8 +109,8 @@ Suggested Dart SDK `>=3.5.0 <4.0.0` and first development version `0.1.0-dev.1`.
 
 ## Deliberately excluded
 
-- `MtnLauncherGameVersion` comparison model: consider independently later; current launcher comparator has narrower release ordering behavior and broad dependencies.
-- `MtnLauncherGameLoaderVersionList`, cache status, HTTP, source parsing, version sorting, compatibility, exact/default selection, stable-preference policy, URL downloading, installer acquisition.
+- `MtnMinecraftGameVersion` comparison model: consider independently later; current launcher comparator has narrower release ordering behavior and broad dependencies.
+- `MtnMinecraftGameLoaderVersionList`, cache status, HTTP, source parsing, version sorting, compatibility, exact/default selection, stable-preference policy, URL downloading, installer acquisition.
 - Generic account/mod/world/item models until concrete shared domain need exists.
 - Compatibility copies, alias classes or enum conversion bridges.
 - Any modification to `minecraft_tools` or `mtn_launcher` in this repository's foundation checkpoint.

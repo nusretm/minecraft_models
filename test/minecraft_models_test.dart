@@ -2,10 +2,10 @@ import 'package:minecraft_models/minecraft_models.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('MtnLauncherGameVersionType', () {
+  group('MtnMinecraftGameVersionType', () {
     test('preserves the existing values and order', () {
       expect(
-        MtnLauncherGameVersionType.values.map((value) => value.name),
+        MtnMinecraftGameVersionType.values.map((value) => value.name),
         [
           'release',
           'snapshot',
@@ -20,64 +20,50 @@ void main() {
     });
   });
 
-  group('MtnLauncherGameLoaderMinecraftVersion', () {
-    test('preserves exact record values through the public API', () {
-      const MtnLauncherGameLoaderMinecraftVersion game = (
-        mcVersion: '24w14a family',
-        versionId: '24W14a+Exact',
-        type: MtnLauncherGameVersionType.snapshot,
-      );
-
-      expect(game.mcVersion, '24w14a family');
-      expect(game.versionId, '24W14a+Exact');
-      expect(game.type, MtnLauncherGameVersionType.snapshot);
-    });
-  });
-
-  group('MtnLauncherGameLoaderChannel', () {
+  group('MtnMinecraftGameLoaderChannel', () {
     test('has the approved values and order', () {
       expect(
-        MtnLauncherGameLoaderChannel.values.map((value) => value.name),
+        MtnMinecraftGameLoaderChannel.values.map((value) => value.name),
         ['stable', 'beta', 'alpha', 'experimental', 'unknown'],
       );
     });
   });
 
-  group('MtnLauncherGameLoaderVersion', () {
+  group('MtnMinecraftGameLoaderVersion', () {
     const exactVersion = '0.15.11+Build.Meta-1.20.1';
     const exactUrl = 'HTTPS://Example.invalid/Path/File.JSON?Build=A%2Bb#Part';
 
     test('defaults an unspecified loader channel to unknown', () {
-      const model = MtnLauncherGameLoaderVersion(
+      const model = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: exactVersion,
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
+        type: MtnMinecraftGameVersionType.release,
       );
 
-      expect(model.channel, MtnLauncherGameLoaderChannel.unknown);
+      expect(model.channel, MtnMinecraftGameLoaderChannel.unknown);
     });
 
     test('keeps game version type and loader channel independent', () {
-      const model = MtnLauncherGameLoaderVersion(
+      const model = MtnMinecraftGameLoaderVersion(
         mcVersion: '24w14a',
         version: 'loader-build',
         url: exactUrl,
-        type: MtnLauncherGameVersionType.snapshot,
-        channel: MtnLauncherGameLoaderChannel.stable,
+        type: MtnMinecraftGameVersionType.snapshot,
+        channel: MtnMinecraftGameLoaderChannel.stable,
       );
 
-      expect(model.type, MtnLauncherGameVersionType.snapshot);
-      expect(model.channel, MtnLauncherGameLoaderChannel.stable);
+      expect(model.type, MtnMinecraftGameVersionType.snapshot);
+      expect(model.channel, MtnMinecraftGameLoaderChannel.stable);
     });
 
     test('round-trips every stored field without normalizing identity or URL', () {
-      const model = MtnLauncherGameLoaderVersion(
+      const model = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: exactVersion,
         url: exactUrl,
-        type: MtnLauncherGameVersionType.preRelease,
-        channel: MtnLauncherGameLoaderChannel.beta,
+        type: MtnMinecraftGameVersionType.preRelease,
+        channel: MtnMinecraftGameLoaderChannel.beta,
       );
 
       final json = model.toJson();
@@ -88,11 +74,11 @@ void main() {
         'type': 'preRelease',
         'channel': 'beta',
       });
-      expect(MtnLauncherGameLoaderVersion.fromJson(json), model);
+      expect(MtnMinecraftGameLoaderVersion.fromJson(json), model);
     });
 
     test('validates without trimming accepted strings', () {
-      final model = MtnLauncherGameLoaderVersion.fromJson({
+      final model = MtnMinecraftGameLoaderVersion.fromJson({
         'mcVersion': ' 1.20.1 ',
         'version': ' Build-A ',
         'url': ' HTTPS://Example.invalid/Exact ',
@@ -106,7 +92,7 @@ void main() {
     });
 
     test('maps only an absent channel to unknown and ignores extra fields', () {
-      final model = MtnLauncherGameLoaderVersion.fromJson({
+      final model = MtnMinecraftGameLoaderVersion.fromJson({
         'mcVersion': '1.20.1',
         'version': exactVersion,
         'url': exactUrl,
@@ -114,8 +100,8 @@ void main() {
         'providerMetadata': 'ignored',
       });
 
-      expect(model.channel, MtnLauncherGameLoaderChannel.unknown);
-      expect(model.type, MtnLauncherGameVersionType.releaseCandidate);
+      expect(model.channel, MtnMinecraftGameLoaderChannel.unknown);
+      expect(model.type, MtnMinecraftGameVersionType.releaseCandidate);
       expect(model.toJson()['channel'], 'unknown');
     });
 
@@ -131,7 +117,7 @@ void main() {
       for (final key in ['mcVersion', 'version', 'url', 'type']) {
         final json = Map<String, Object?>.of(valid)..remove(key);
         expect(
-          () => MtnLauncherGameLoaderVersion.fromJson(json),
+          () => MtnMinecraftGameLoaderVersion.fromJson(json),
           throwsFormatException,
           reason: key,
         );
@@ -150,7 +136,7 @@ void main() {
         for (final invalid in <Object?>[null, 42, '', ' \t\r\n']) {
           final json = Map<String, Object?>.of(valid)..[key] = invalid;
           expect(
-            () => MtnLauncherGameLoaderVersion.fromJson(json),
+            () => MtnMinecraftGameLoaderVersion.fromJson(json),
             throwsFormatException,
             reason: '$key: $invalid',
           );
@@ -160,7 +146,7 @@ void main() {
 
     test('rejects invalid type names', () {
       expect(
-        () => MtnLauncherGameLoaderVersion.fromJson({
+        () => MtnMinecraftGameLoaderVersion.fromJson({
           'mcVersion': '1.20.1',
           'version': exactVersion,
           'url': exactUrl,
@@ -173,7 +159,7 @@ void main() {
     test('rejects explicit invalid channel values', () {
       for (final invalid in <Object?>[null, 42, '', '   ', 'preview']) {
         expect(
-          () => MtnLauncherGameLoaderVersion.fromJson({
+          () => MtnMinecraftGameLoaderVersion.fromJson({
             'mcVersion': '1.20.1',
             'version': exactVersion,
             'url': exactUrl,
@@ -187,23 +173,23 @@ void main() {
     });
 
     test('shortens only an exact leading or trailing Minecraft version', () {
-      const leading = MtnLauncherGameLoaderVersion(
+      const leading = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: '1.20.1-loader-build',
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
+        type: MtnMinecraftGameVersionType.release,
       );
-      const trailing = MtnLauncherGameLoaderVersion(
+      const trailing = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: 'loader-build-1.20.1',
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
+        type: MtnMinecraftGameVersionType.release,
       );
-      const embedded = MtnLauncherGameLoaderVersion(
+      const embedded = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: 'loader-1.20.1-build',
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
+        type: MtnMinecraftGameVersionType.release,
       );
 
       expect(leading.text, 'loader-build');
@@ -212,61 +198,61 @@ void main() {
     });
 
     test('uses structural equality and hashes every stored field', () {
-      const first = MtnLauncherGameLoaderVersion(
+      const first = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: exactVersion,
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
-        channel: MtnLauncherGameLoaderChannel.stable,
+        type: MtnMinecraftGameVersionType.release,
+        channel: MtnMinecraftGameLoaderChannel.stable,
       );
-      const equal = MtnLauncherGameLoaderVersion(
+      const equal = MtnMinecraftGameLoaderVersion(
         mcVersion: '1.20.1',
         version: exactVersion,
         url: exactUrl,
-        type: MtnLauncherGameVersionType.release,
-        channel: MtnLauncherGameLoaderChannel.stable,
+        type: MtnMinecraftGameVersionType.release,
+        channel: MtnMinecraftGameLoaderChannel.stable,
       );
       const differentValues = [
-        MtnLauncherGameLoaderVersion(
+        MtnMinecraftGameLoaderVersion(
           mcVersion: '1.20.2',
           version: exactVersion,
           url: exactUrl,
-          type: MtnLauncherGameVersionType.release,
-          channel: MtnLauncherGameLoaderChannel.stable,
+          type: MtnMinecraftGameVersionType.release,
+          channel: MtnMinecraftGameLoaderChannel.stable,
         ),
-        MtnLauncherGameLoaderVersion(
+        MtnMinecraftGameLoaderVersion(
           mcVersion: '1.20.1',
           version: 'different-build',
           url: exactUrl,
-          type: MtnLauncherGameVersionType.release,
-          channel: MtnLauncherGameLoaderChannel.stable,
+          type: MtnMinecraftGameVersionType.release,
+          channel: MtnMinecraftGameLoaderChannel.stable,
         ),
-        MtnLauncherGameLoaderVersion(
+        MtnMinecraftGameLoaderVersion(
           mcVersion: '1.20.1',
           version: exactVersion,
           url: 'https://different.invalid/',
-          type: MtnLauncherGameVersionType.release,
-          channel: MtnLauncherGameLoaderChannel.stable,
+          type: MtnMinecraftGameVersionType.release,
+          channel: MtnMinecraftGameLoaderChannel.stable,
         ),
-        MtnLauncherGameLoaderVersion(
+        MtnMinecraftGameLoaderVersion(
           mcVersion: '1.20.1',
           version: exactVersion,
           url: exactUrl,
-          type: MtnLauncherGameVersionType.snapshot,
-          channel: MtnLauncherGameLoaderChannel.stable,
+          type: MtnMinecraftGameVersionType.snapshot,
+          channel: MtnMinecraftGameLoaderChannel.stable,
         ),
-        MtnLauncherGameLoaderVersion(
+        MtnMinecraftGameLoaderVersion(
           mcVersion: '1.20.1',
           version: exactVersion,
           url: exactUrl,
-          type: MtnLauncherGameVersionType.release,
-          channel: MtnLauncherGameLoaderChannel.beta,
+          type: MtnMinecraftGameVersionType.release,
+          channel: MtnMinecraftGameLoaderChannel.beta,
         ),
       ];
 
       expect(first, equal);
       expect(first.hashCode, equal.hashCode);
-      final equalSet = <MtnLauncherGameLoaderVersion>{};
+      final equalSet = <MtnMinecraftGameLoaderVersion>{};
       equalSet.add(first);
       equalSet.add(equal);
       expect(equalSet, hasLength(1));
