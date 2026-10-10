@@ -1,9 +1,11 @@
 # Shared Minecraft Models — Foundation Design
 
 Date: 2026-10-09
-Status: **MOD-1 contract approved and implemented on feature branch; review pending**
+Status: **Historical MOD-1 foundation design. Current contract is recorded in CURRENT_TARGET.md and WORKING_RULES.md.**
 Repository: `nusretm/minecraft_models`
 Consumers: `nusretm/mtn_launcher`, `nusretm/minecraft_tools/minecraft_loader_version_list`
+
+This historical plan predates the later generic `MtnMinecraftGameLoaderVersionList` implementation and the `MtnMinecraft...` naming decisions. Its original HTTP/cache exclusions and example named-record contract are not authoritative for the current implementation.
 
 ## Why an independent package?
 

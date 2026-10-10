@@ -4,7 +4,7 @@ Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
 Feature baseline `main` HEAD: `f7649860787f261460e3495bb174e4902aa51f1d`
-Active checkpoint: **LVL-I3A optional source SHA-1 metadata — Windows validated; PR #5 open; squash merge pending separate approval**
+Active checkpoint: **Generic VersionList resilience, [draft PR #6](https://github.com/nusretm/minecraft_models/pull/6) — Windows validation pending, merge not approved**
 Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
 
 ## VersionList resilience — 2026-10-10
@@ -16,10 +16,11 @@ Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98`
 - Public barrel exports the generic VersionList. It never downloads game artifacts, verifies SHA-1, installs loaders or runs Minecraft.
 - Focused regression tests are authored but **not executed in this environment**. Windows `dart pub get`, `dart analyze`, `dart test`, source diff review and explicit merge approval remain outstanding.
 - The subsequent LVL-I3A section records older model/history and should not be mistaken for evidence of SHA-1 support in the current renamed `MtnMinecraftGameLoaderVersion`.
-## LVL-I3A — Optional source SHA-1 metadata (2026-10-10)
+
+## Historical LVL-I3A — Optional source SHA-1 metadata (2026-10-10)
 
 - **Approved by user for implementation** as a bounded upstream model contract needed by MtnLauncher Vanilla VersionList migration.
-- Implemented and Windows validated (analyzer clean, focused 7/7, full 21/21, diff check passed) on baseline main `6791f0b4ea36f7e7053084d6e96bfa52b0369918`; feature commit `10d7c02b4a3edc69d3f6f685b1e8384ade38a225` pushed to `feature/loader-version-source-sha1-metadata`; [PR #5](https://github.com/nusretm/minecraft_models/pull/5) is open, awaiting separate squash-merge approval.
+- Implemented and Windows validated (analyzer clean, focused 7/7, full 21/21, diff check passed) on baseline main `6791f0b4ea36f7e7053084d6e96bfa52b0369918`; feature commit `10d7c02b4a3edc69d3f6f685b1e8384ade38a225` pushed to `feature/loader-version-source-sha1-metadata`; [PR #5](https://github.com/nusretm/minecraft_models/pull/5) was merged; this historical checkpoint predates the later `MtnMinecraft...` renaming.
 - Extend existing immutable `MtnLauncherGameLoaderVersion` with optional `String? sha1`: exact provider-provided source checksum metadata associated with `url`. Keep `const` constructor, required values, type, channel and URL identity unchanged. Absent `sha1` => null; `toJson` only emits the key when non-null; explicitly malformed JSON `sha1` fails as `FormatException`. Equality and hashCode include the field.
 - No byte hashing, digest trust, downloader, VersionList provider callbacks, cache IO changes, MtnLauncher application changes or sibling repository commits in this checkpoint. `minecraft_loader_version_list` already delegates item serialization to model `toJson/fromJson` but remains pinned to an older model SHA until a separately validated consumer dependency update.
 - Full bounded design/acceptance details: `LVL_I3A_SOURCE_SHA1_METADATA.md`. Do not claim source integrity verification or successful consumer integration from model tests alone.
@@ -33,14 +34,15 @@ Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98`
 
 ## Project objective
 
-Provide one pure-Dart model identity for the independent `mtn_launcher` and `minecraft_loader_version_list` packages. No duplicate `MtnMinecraftGameVersionType` or conversion/alias bridge. No HTTP, caching, provider-specific parsing, UI, or game launch in this package.
+Provide shared pure-Dart Minecraft model identity and the generic callback-driven `MtnMinecraftGameLoaderVersionList` for consumers. The VersionList may use HTTP metadata requests and best-effort filesystem cache. Provider wire-format parsing, artifact installation, UI and game launch are outside this package.
 
 ## Implemented foundation contracts
 
-1. `MtnMinecraftGameVersionType` — existing eight-value Minecraft game-version enum.
-2. `MtnMinecraftGameLoaderMinecraftVersion` — named record `(mcVersion, versionId, type)` preserving exact upstream ID.
-3. `MtnMinecraftGameLoaderChannel` — `stable, beta, alpha, experimental, unknown` for loader build channel.
-4. `MtnMinecraftGameLoaderVersion` — exact version, Minecraft game version, provider-defined URL, game version type and loader channel; immutable JSON-capable value with structural equality.
+1. `MtnMinecraftGameVersionType` — eight-value Minecraft game-version enum.
+2. `MtnMinecraftGameLoaderChannel` — independent loader publication channel enum.
+3. `MtnMinecraftGameLoaderVersion` — immutable build identity with exact version/URL, type, channel and JSON/equality.
+4. `MtnMinecraftGameLoaderVersionList` — generic callback-owned catalog loading, version filtering and metadata retrieval, preserving provider order.
+5. `MtnMinecraftGameLoaderVersionListCache` — best-effort JSON persistence with non-fatal read/write failures.
 
 The loader build constructor defaults `channel` to `unknown`. JSON requires
 non-empty `mcVersion`, `version`, `url`, and `type` strings. An absent `channel`

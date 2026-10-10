@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import '../minecraft_models.dart';
+import 'mtn_minecraft_game_loader_version.dart';
+import 'mtn_minecraft_game_version_type.dart';
 import 'mtn_minecraft_game_loader_version_list.dart';
 
 // buradaki try catch kullanımının sebebi: cache yüzünden kod hata vermemeli.

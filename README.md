@@ -38,9 +38,9 @@ Paketin tek public API giriş noktası kullanılır. `MtnMinecraftGameLoaderVers
 import 'package:minecraft_models/minecraft_models.dart';
 ```
 
-İlk foundation API'si Minecraft sürüm tipini, loader tarafından desteklenen
-Minecraft sürümü named record'unu, loader build channel enum'unu ve immutable
-loader build modelini içerir. Loader build modeli exact upstream version ve URL
+Güncel public API Minecraft sürüm tipi ve loader build channel enum'larını,
+immutable loader build modelini ve generic `MtnMinecraftGameLoaderVersionList`
+sınıfını içerir. Loader build modeli exact upstream version ve URL
 değerlerini değiştirmeden saklar. Genel VersionList ise loader'a özel JSON formatlarını bilmeden
 callback sonuçlarını ve best-effort cache'i yönetir. Mevcut `MtnMinecraftGameLoaderVersion`
 modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılmaz.

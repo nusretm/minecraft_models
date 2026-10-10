@@ -49,7 +49,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 
 1. Approve and implement the four foundation models here.
 2. Validate on Windows, record a fixed commit/tag, separately approve merge.
-3. Migrate `minecraft_tools/minecraft_loader_version_list` without duplicate types.
+3. Review `minecraft_tools/minecraft_loader_version_list` migration independently; avoid duplicate canonical model identity or competing generic VersionList ownership.
 4. Integrate `mtn_launcher` in a separate approved checkpoint.
 5. Keep Forge V1-B2 legacy libraries and V1-B3 launcher execution changes independently gated.
 
