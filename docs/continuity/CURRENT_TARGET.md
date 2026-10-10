@@ -3,14 +3,55 @@
 Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
-Current `main` HEAD: `6791f0b4ea36f7e7053084d6e96bfa52b0369918`
-Active checkpoint: **LVL-I3A optional source SHA-1 metadata — Windows validated; PR #5 open; squash merge pending separate approval**
+Feature baseline `main` HEAD: `f7649860787f261460e3495bb174e4902aa51f1d`
+Active checkpoint: **Canonical loader enum + concrete provider VersionList architecture, [PR #6](https://github.com/nusretm/minecraft_models/pull/6) — Windows verified, merge and cleanup explicitly approved (2026-10-10)**
 Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
 
-## LVL-I3A — Optional source SHA-1 metadata (2026-10-10)
+## PR #6 — Windows verification and closure gate (2026-10-10)
+
+- User executed validation on branch `fix/game-loader-version-list-resilience` at HEAD `ed4c06626455157b05454b8d202bece72df5189a`: `dart analyze` → no issues; `dart test` → 40/40 passed; `git diff --check origin/main...HEAD` → clean; `git status` → clean and synchronized with origin.
+- Live `dart run example/game_loader_version_lists.dart 1.21.11` returned builds for all five: Vanilla 9, Fabric 253, Quilt 307, Forge 31, NeoForge 45. These are metadata discovery results, not validation that all supplied artifact URLs exist or that Minecraft launches.
+- Quilt upstream order included `0.20.0-beta.9`, `0.20.0-beta.7`, `0.20.0-beta.8`. Do not infer complete semantic or publication ordering from the first few values. Sorting/selection policy is a separate follow-up, not part of this closure.
+- User explicitly authorized **merge and cleanup** after this evidence. Update this continuity record before merge. Final merged SHA and remote/local branch cleanup should be verified after the actual operations; approval alone is not evidence of completion.
+- Consumer integration in `mtn_launcher` or `minecraft_tools` is **not** included in this PR. Consumers should pin an approved fixed commit SHA/tag once merged.
+
+## Canonical loader identity — MtnMinecraftLoaderType (2026-10-10)
+
+- Canonical type: `lib/src/mtn_minecraft_loader_type.dart`, exported through `lib/minecraft_models.dart` for both this package and later `MtnLauncher` consumption. Values are `vanilla`, `fabric`, `forge`, `neoforge`, `quilt`.
+- Public base field/constructor rename: `loaderName: String` → `loaderType: MtnMinecraftLoaderType`. Provider constructors fix their enum values; consumers still pass only `cacheDirectory` and optional `cacheDuration`.
+- `MtnMinecraftLoaderType.fromName(String?)` is case-insensitive and trims whitespace; unsupported names return null without throwing or silently choosing Vanilla. `.name` is the built-in canonical string form.
+- The cache key derives from `loaderType.name`; previous provider filenames remain unchanged. No backwards-compatibility property or separate launcher enum is added in this repository.
+- Added tests for all five enum values, safe name conversion and provider type identities. Post-change Windows verification was successful (40 passing tests and five live provider lookups); see PR #6 closure gate above.
+
+## Concrete VersionList providers — approved implementation (2026-10-10)
+
+- User explicitly approved implementing the provider architecture. The same `MtnMinecraftGameLoaderVersionList` name is kept as an abstract common base; it owns caching, HTTP, diagnostics and lifecycle.
+- Remove public `onLoadFromWeb` and `onGenerateMinecraftVersionList` constructor callbacks. Concrete subclasses override `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`. Each fixes its own `loaderType` enum value in the superclass initializer; consumers only pass `cacheDirectory` (optional cache duration).
+- Provider sources: `lib/src/loaders/mtn_minecraft_game_loader_version_list_vanilla.dart`, `..._fabric.dart`, `..._quilt.dart`, `..._forge.dart`, `..._neoforge.dart`. All five exported via `minecraft_models.dart`.
+- The generic value model `MtnMinecraftGameLoaderVersion` remains unchanged: `fromRawData()` is explicitly canceled. Provider-specific mappings (including NeoForge) are owned by each provider; small reusable parsing rules live in `loaders/src/`.
+- `getFromMinecraftVersion()` can initialize the general catalog if needed. It must not persist an empty per-game cache after a catalog failure. Preserve valid stale cache fallback, enum-based errors and provider order.
+- `example/game_loader_version_lists.dart` now instantiates the five ready-made providers; it contains no callbacks or wire-format parsing.
+- Offline tests include concrete provider fixtures for Vanilla, Fabric, Quilt, Forge, NeoForge; test-only subclasses exercise shared caching/error behavior. Baseline before refactor: 29 tests passed; after refactor and typed enum: `dart analyze` clean, 40 tests passed and all five live provider lookups returned results (user Windows run).
+- PR #6 merge and cleanup explicitly approved by user after Windows validation; preserve the post-merge verification and local cleanup gate.
+
+## Earlier VersionList resilience and typed diagnostics — 2026-10-10
+
+- Branch: `fix/game-loader-version-list-resilience`, based on `f764986`.
+- Keep `MtnMinecraftGameLoaderVersionList` and `MtnMinecraftGameLoaderVersionListCache` names and public callback contracts unchanged. They represent a generic Minecraft game-loader version index, not a launcher-specific implementation.
+- Add `lib/src/mtn_minecraft_error.dart` with `MtnMinecraftError.none`, `unknown`, 1000-range cache failures and 2000-range download failures; preserve `fromIndex`, `fromCode`, `isCacheError`, `isDownloadError`. `VersionList.error` is typed; `errorCode` derives from `.code`, and `_setError(MtnMinecraftError, [message])` centralizes updates. HTTP status may appear in `errorMessage`; no separate HTTP-status field is retained.
+- Deliberately non-fatal HTTP/cache failures remain non-fatal to callers. Preserve HTTP failure classification and descriptive messages, reset diagnostics on success, provide cache write diagnostics, handle filesystem metadata exceptions, retry malformed caches from the provider, and use valid expired cache after a failed refresh.
+- Filter returned loader builds by requested Minecraft version and types; do not reorder provider results, whose first element is already the newest compatible published build.
+- Public barrel exports the generic VersionList. It never downloads game artifacts, verifies SHA-1, installs loaders or runs Minecraft.
+- Historical checkpoint: the first five-provider example used `(list, mcVersion, types)` callbacks inside `example/`. The approved concrete-provider refactor above supersedes that structure. Its Forge/NeoForge source URL points to a Maven installer artifact rather than a JSON profile.
+- The Fabric/Quilt general cache contains supported Minecraft-version index records (the `version` is the game identifier), while the per-game callback returns actual compatible loader builds. This distinction should not be confused with a full loader build catalog from the first callback.
+- Four offline tests cover example parsing and one test confirms that requested `types` reaches the callback.
+- Focused regression tests and enum tests are authored but **not executed in this environment**. Windows `dart pub get`, `dart analyze`, `dart test`, source diff review and explicit merge approval remain outstanding.
+- The subsequent LVL-I3A section records older model/history and should not be mistaken for evidence of SHA-1 support in the current renamed `MtnMinecraftGameLoaderVersion`.
+
+## Historical LVL-I3A — Optional source SHA-1 metadata (2026-10-10)
 
 - **Approved by user for implementation** as a bounded upstream model contract needed by MtnLauncher Vanilla VersionList migration.
-- Implemented and Windows validated (analyzer clean, focused 7/7, full 21/21, diff check passed) on baseline main `6791f0b4ea36f7e7053084d6e96bfa52b0369918`; feature commit `10d7c02b4a3edc69d3f6f685b1e8384ade38a225` pushed to `feature/loader-version-source-sha1-metadata`; [PR #5](https://github.com/nusretm/minecraft_models/pull/5) is open, awaiting separate squash-merge approval.
+- Implemented and Windows validated (analyzer clean, focused 7/7, full 21/21, diff check passed) on baseline main `6791f0b4ea36f7e7053084d6e96bfa52b0369918`; feature commit `10d7c02b4a3edc69d3f6f685b1e8384ade38a225` pushed to `feature/loader-version-source-sha1-metadata`; [PR #5](https://github.com/nusretm/minecraft_models/pull/5) was merged; this historical checkpoint predates the later `MtnMinecraft...` renaming.
 - Extend existing immutable `MtnLauncherGameLoaderVersion` with optional `String? sha1`: exact provider-provided source checksum metadata associated with `url`. Keep `const` constructor, required values, type, channel and URL identity unchanged. Absent `sha1` => null; `toJson` only emits the key when non-null; explicitly malformed JSON `sha1` fails as `FormatException`. Equality and hashCode include the field.
 - No byte hashing, digest trust, downloader, VersionList provider callbacks, cache IO changes, MtnLauncher application changes or sibling repository commits in this checkpoint. `minecraft_loader_version_list` already delegates item serialization to model `toJson/fromJson` but remains pinned to an older model SHA until a separately validated consumer dependency update.
 - Full bounded design/acceptance details: `LVL_I3A_SOURCE_SHA1_METADATA.md`. Do not claim source integrity verification or successful consumer integration from model tests alone.
@@ -24,14 +65,17 @@ Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98`
 
 ## Project objective
 
-Provide one pure-Dart model identity for the independent `mtn_launcher` and `minecraft_loader_version_list` packages. No duplicate `MtnMinecraftGameVersionType` or conversion/alias bridge. No HTTP, caching, provider-specific parsing, UI, or game launch in this package.
+Provide shared pure-Dart Minecraft model identity, a typed loader identity enum and the abstract `MtnMinecraftGameLoaderVersionList` with concrete Vanilla/Fabric/Quilt/Forge/NeoForge providers. The base class owns best-effort HTTP metadata/cache handling; provider subclasses own wire parsing. Artifact installation, UI and game launch remain outside this package.
 
 ## Implemented foundation contracts
 
-1. `MtnMinecraftGameVersionType` — existing eight-value Minecraft game-version enum.
-2. `MtnMinecraftGameLoaderMinecraftVersion` — named record `(mcVersion, versionId, type)` preserving exact upstream ID.
-3. `MtnMinecraftGameLoaderChannel` — `stable, beta, alpha, experimental, unknown` for loader build channel.
-4. `MtnMinecraftGameLoaderVersion` — exact version, Minecraft game version, provider-defined URL, game version type and loader channel; immutable JSON-capable value with structural equality.
+1. `MtnMinecraftGameVersionType` — eight-value Minecraft game-version enum.
+2. `MtnMinecraftGameLoaderChannel` — independent loader publication channel enum.
+3. `MtnMinecraftGameLoaderVersion` — immutable build identity with exact version/URL, type, channel and JSON/equality.
+4. `MtnMinecraftGameLoaderVersionList` — abstract catalog/cache/HTTP base; provider overrides load and generate version lists, preserving provider order.
+5. `MtnMinecraftGameLoaderVersionListCache` — best-effort JSON persistence with non-fatal read/write failures.
+6. `MtnMinecraftLoaderType` — canonical Vanilla/Fabric/Forge/NeoForge/Quilt enum with safe `fromName()`.
+7. Five exported concrete VersionList provider implementations.
 
 The loader build constructor defaults `channel` to `unknown`. JSON requires
 non-empty `mcVersion`, `version`, `url`, and `type` strings. An absent `channel`
@@ -44,7 +88,7 @@ writes the channel. Exact IDs and URLs are preserved without normalization.
 
 - `nusretm/mtn_launcher`: Forge V1-B1 already merged; V1-B2 trust/source acquisition and V1-B3 TaskList remain separately gated.
 - `nusretm/minecraft_tools`: VersionList `feature/minecraft-loader-version-list-foundation`, PR #57, is a later consumer migration. Its current in-package model definitions are retained until the fixed shared model dependency is ready.
-- The VersionList API owns catalog/cache/metadata/selection, not this package.
+- Historical note (superseded): the VersionList API was formerly maintained separately; this package now contains the approved concrete provider subclasses.
 - CLI future goal: `--loader fabric` resolves a compatible default build, `--loader-ver` selects one exact full build. That selection algorithm is **outside** the shared value models.
 
 ## Historical MOD-1 validation and checkpoint

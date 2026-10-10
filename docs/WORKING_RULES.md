@@ -5,8 +5,8 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 ## Scope and ownership
 
 - Package: `minecraft_models`, an independent pure-Dart repository shared by `mtn_launcher` and `minecraft_loader_version_list`.
-- Only approved common value models, named records and enums belong here.
-- No Flutter, UI, HTTP, filesystems, network, caching, loader providers, installation, game-launch orchestration, version discovery, or version-selection services.
+- Common value models/enums, the abstract `MtnMinecraftGameLoaderVersionList` base, and its five concrete provider classes belong here.
+- The abstract VersionList owns shared HTTP metadata requests, best-effort JSON cache and error handling. Vanilla, Fabric, Quilt, Forge and NeoForge subclasses own their endpoint URLs and provider-specific wire parsing. Artifact installation, UI and game-launch orchestration remain outside this package.
 - Keep dependency direction one way: consumers depend on `minecraft_models`; models never import consumers.
 - Avoid speculative class hierarchies/frameworks and duplicating types already owned here.
 
@@ -24,10 +24,14 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - One semantic type has one implementation. Consumers import or re-export the same Dart type; do not add conversion wrappers for copied enums.
 - `MtnMinecraftGameVersionType` describes Minecraft game version type.
 - `MtnMinecraftGameLoaderChannel` describes loader-build publication channel; an unknown channel is not automatically stable.
+- `MtnMinecraftLoaderType` is the canonical, exported Minecraft loader identity shared with the launcher (vanilla, fabric, forge, neoforge, quilt). Avoid duplicate enum definitions or alias strings in consumers. `fromName` trims and ignores case; unknown inputs return null instead of implicitly selecting Vanilla.
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
-- Sorting, latest/stable selection, compatibility queries, cache state, HTTP metadata and launcher orchestration are consumer responsibilities.
+- Concrete providers own source discovery and build ordering; the base VersionList preserves their order, filters Minecraft version/type, and performs best-effort metadata/cache access. Consumer launch and exact/default loader selection remain outside this package.
+- Each concrete subclass fixes `loaderType: MtnMinecraftLoaderType.<provider>` in the base constructor; `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)` are provider overrides, not public constructor callbacks. Keep provider parsing inside provider files, with small shared pure parsing helpers where genuinely needed.
+- Cache file identity uses `loaderType.name`, preserving the previous Vanilla/Fabric/Forge/NeoForge/Quilt cache filenames. Do not add a `loaderName` compatibility field before the first release.
+- Use `MtnMinecraftError` for cache (1000-range) and download (2000-range) failures. Successful operations use `none(0)`. Expose the typed error plus its numeric code/message; use `VersionList._setError(MtnMinecraftError, [message])` for updates, and include HTTP status details in the message without a separate HTTP status field. Non-fatal failures must not prevent using available catalog data.
 
 ## Naming and architecture
 
@@ -49,7 +53,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 
 1. Approve and implement the four foundation models here.
 2. Validate on Windows, record a fixed commit/tag, separately approve merge.
-3. Migrate `minecraft_tools/minecraft_loader_version_list` without duplicate types.
+3. Review `minecraft_tools/minecraft_loader_version_list` migration independently; avoid duplicate canonical model identity or competing generic VersionList ownership.
 4. Integrate `mtn_launcher` in a separate approved checkpoint.
 5. Keep Forge V1-B2 legacy libraries and V1-B3 launcher execution changes independently gated.
 
