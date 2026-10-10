@@ -6,11 +6,11 @@ Future<void> main(List<String> args) async {
   final mcVersion = args.isEmpty ? '1.21.11' : args.first;
   final cacheDirectory = '${Directory.systemTemp.path}${Platform.pathSeparator}mtn_minecraft_game_loader_version_lists';
 
-  var versionListVanilla = MtnMinecraftGameLoaderVersionListVanilla(cacheDirectory: cacheDirectory);
-  var versionListFabric = MtnMinecraftGameLoaderVersionListFabric(cacheDirectory: cacheDirectory);
-  var versionListQuilt = MtnMinecraftGameLoaderVersionListQuilt(cacheDirectory: cacheDirectory);
-  var versionListForge = MtnMinecraftGameLoaderVersionListForge(cacheDirectory: cacheDirectory);
-  var versionListNeoForge = MtnMinecraftGameLoaderVersionListNeoForge(cacheDirectory: cacheDirectory);
+  var versionListVanilla = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.vanilla);
+  var versionListFabric = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.fabric);
+  var versionListQuilt = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.quilt);
+  var versionListForge = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.forge);
+  var versionListNeoForge = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.neoforge);
 
   for (final (label, versionList) in <(String, MtnMinecraftGameLoaderVersionList)>[
     ('Vanilla', versionListVanilla),

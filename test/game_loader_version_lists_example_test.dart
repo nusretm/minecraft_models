@@ -1,4 +1,5 @@
 import 'package:minecraft_models/src/loaders/src/mtn_minecraft_game_loader_version_parsing.dart' as parsing;
+import 'package:minecraft_models/src/loaders/mtn_minecraft_game_loader_version_list_neoforge.dart' as neoforge;
 
 import 'package:minecraft_models/minecraft_models.dart';
 import 'package:test/test.dart';
@@ -21,12 +22,12 @@ void main() {
   });
 
   test('NeoForge version-family mapping covers legacy and modern calendar versions', () {
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('20.2.3-beta'), '1.20.2');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('21.1.181'), '1.21.1');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('21.11.10-beta'), '1.21.11');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('26.1.2.15'), '26.1.2');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('26.2.0.71'), '26.2');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('unexpected'), isNull);
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('20.2.3-beta'), '1.20.2');
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('21.1.181'), '1.21.1');
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('21.11.10-beta'), '1.21.11');
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('26.1.2.15'), '26.1.2');
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('26.2.0.71'), '26.2');
+    expect(neoforge.MtnMinecraftGameLoaderVersionListNeoForge.minecraftVersionFromBuild('unexpected'), isNull);
   });
 
   test('Unknown loader channels must not be advertised as stable', () {
