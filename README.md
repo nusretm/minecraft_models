@@ -82,8 +82,6 @@ sınıfından türetilir. Helper ve beş provider sınıfı, paket barrel export
 dahil değildir. Provider'ın upstream JSON/XML ayrıştırması ve endpoint'leri
 `lib/src/loaders/` altında kalır.
 
-
-
 ```dart
 final cacheDirectory = Directory.systemTemp.path;
 
@@ -108,10 +106,10 @@ ve loader'a özgü dönüşüm provider sorumluluğudur.
 dart run example/game_loader_version_lists.dart 1.21.11
 ```
 
-Örneğin `main()` metodu Vanilla, Fabric, Quilt, Forge ve NeoForge için
-beş `MtnMinecraftGameLoaderVersionList` nesnesi oluşturur; her birinin
-`loaderType` değeri farklıdır. Cache işletim sisteminin geçici klasörü
-altındadır; uygulamanın callback veya provider sınıfı tanımlaması gerekmez.
+Örneğin `main()` metodu `MtnMinecraftLoaderType.values` üzerinde dönerek
+beş `MtnMinecraftGameLoaderVersionList` nesnesi oluşturur. Yeni loader türleri
+elle yazılmış ayrı değişkenler veya sabit listeler gerektirmez. Cache işletim
+sisteminin geçici klasörü altındadır; callback veya provider sınıfı tanımlanmaz.
 
 Vanilla helper'ı Mojang manifest index'ini okur. Fabric ve Quilt helper'larının
 `doLoadFromWeb()` metotları desteklenen **Minecraft sürümü index kayıtlarını** tutar;
@@ -127,7 +125,8 @@ Maven metadata'nın sayısal sürüm sıralaması yayın tarihi garantisi vermez
 
 ## Proje durumu
 
-PR #6'nın eski concrete-provider sözleşmesi Windows'ta doğrulandı ve `main`e
-merge edildi (40/40 test). Güncel helper refaktörü ayrı feature branch'tedir;
-yeni sözleşmenin analyzer/test ve canlı smoke doğrulaması henüz yapılmadı.
-Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
+PR #6'nın önceki concrete-provider sözleşmesi Windows'ta doğrulandı ve `main`e
+merge edildi (40/40 test). PR #7 helper refaktörü ve `MtnMinecraftLoaderType.values`
+örneği için merge/cleanup onayı verildi; yeni sözleşmenin Windows analyzer/test
+ve canlı smoke doğrulaması ise henüz yapılmadı. Tüketici repository entegrasyonları
+ayrı checkpoint'lerdir.
