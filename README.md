@@ -1,132 +1,70 @@
 # Minecraft Models
 
-MTM Launcher ve MTN Minecraft Tools projelerinin ortak kullanacağı Minecraft
-modellerini ve veri tanımlarını tek bir yerde tutan projedir.
+`minecraft_models` is the shared, pure-Dart source of truth for Minecraft loader identities, version values and version metadata discovery used by MTN Launcher and Minecraft Tools. Shared type identity avoids duplicating enums and provider parsing across projects.
 
-## Amaç
+**Current status (2026-10-10):** [PR #7](https://github.com/nusretm/minecraft_models/pull/7) is **merged and Windows-validated**. Verified implementation SHA: `1c4e346ed42bf9f15b0259c8efb2f7d3011758a3`. On merged `main`, `dart analyze` returned no issues, `dart test` passed **40/40**, and live metadata discovery succeeded for all five loaders on Minecraft 1.21.11 and 1.21.1. Feature-branch cleanup was completed; this documentation closure does not change Dart code.
 
-İki uygulamanın aynı kavramları tutarlı biçimde temsil etmesini sağlamak.
-Paylaşılan model ve tanımların bu projede merkezi olarak geliştirilmesi,
-uygulamalar arasında yinelenen kodu ve zamanla oluşabilecek uyumsuzlukları
-azaltır.
+## The public API
 
-## Kapsam
-
-Bu proje, iki uygulamanın birlikte kullanabileceği ortak veri modellerini
-içerecektir. Örneğin, ihtiyaçlar netleştikçe Minecraft sürümleri, modlar,
-profiller veya araçların paylaştığı diğer alanlar için modeller burada
-tanımlanabilir.
-
-Uygulamaya özel arayüz, iş akışı ve iş mantığı bu projenin kapsamı dışındadır;
-bu davranışlar ilgili uygulamalarda kalmalıdır.
-
-## Tasarım ilkeleri
-
-- Ortak bir kavramın tek ve tutarlı bir tanımı olmalıdır.
-- Modeller, tüketici uygulamaların belirli bir arayüzüne veya iş akışına
-  bağımlı olmamalıdır.
-- Model değişiklikleri MTM Launcher ve MTN Minecraft Tools ile uyumluluk
-  gözetilerek yapılmalıdır.
-- Bir modelin anlamı ve alanları, kullanıldığı yerde açık ve anlaşılır
-  olmalıdır.
-
-## Kullanım
-
-Paketin tek public API giriş noktası kullanılır. `MtnMinecraftGameLoaderVersionList` somut bir sınıftır; loader türüne göre dahili helper seçer. Cache ve metadata hataları kullanılabilir veriyi kaybettirmez:
+Import from the single supported entry point:
 
 ```dart
 import 'package:minecraft_models/minecraft_models.dart';
 ```
 
-Güncel public API Minecraft sürüm tipi ve loader build channel enum'larını,
-immutable loader build modelini ve somut `MtnMinecraftGameLoaderVersionList` sınıfını içerir. Loader build modeli exact upstream version ve URL
-değerlerini değiştirmeden saklar. Genel VersionList, provider override sonuçlarını
-ve best-effort cache'i yönetir. Loader'a özel JSON/XML parsing ise provider sınıflarındadır.
-Mevcut `MtnMinecraftGameLoaderVersion`
-modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılmaz.
+| Public symbol | Purpose |
+| --- | --- |
+| `MtnMinecraftLoaderType` | Single loader identity: `vanilla`, `fabric`, `forge`, `neoforge`, `quilt`. Use `values` or `fromName(String?)` (unknown => `null`). |
+| `MtnMinecraftGameLoaderVersionList` | **Constructible public facade** for catalogs, Minecraft-compatible loader versions, HTTP, cache and typed errors. |
+| `MtnMinecraftGameLoaderVersion` | Immutable data model: `mcVersion`, exact `version`, source `url`, game `type`, loader `channel`; JSON serialization and display-only `text`. |
+| `MtnMinecraftGameVersionType` | Type of the Minecraft game version (release, snapshot, preview, etc.). |
+| `MtnMinecraftGameLoaderChannel` | Loader build publication channel; `unknown` is **not** stable. |
+| `MtnMinecraftError` | Metadata/cache diagnostic (`error`, `errorCode`, `errorMessage` on VersionList). |
 
-### Hata yönetimi
+There is **one public `MtnMinecraftGameLoaderVersionList`**, not a public VersionList class for each loader. `MtnMinecraftGameLoaderVersionListHelper` and the five provider helper classes live in `lib/src/` and are **not** exported; consumer projects should neither import nor instantiate them. The facade chooses the helper from `loaderType` and owns all HTTP/cache/error state.
 
-`MtnMinecraftError`, cache ve download sorunlarını sayısal olarak gruplar.
-`MtnMinecraftGameLoaderVersionList.error` tipli hata değeridir;
-`errorCode` aynı enum'un `.code` değerini verir. `errorMessage` ayrıntıyı,
-HTTP yanıt kodu gerekiyorsa `errorMessage` içinden okunabilir. Başarılı işlemler
-`MtnMinecraftError.none` durumuna döner. Cache ve indirme sorunları kullanılabilir
-liste verisini otomatik olarak geçersiz kılmaz.
-
-### Ortak Minecraft loader kimliği
-
-`MtnMinecraftLoaderType` bu paketin public enum'udur ve `MtnLauncher` tarafından
-aynı tip olarak kullanılmalıdır; ikinci bir loader type enum'u oluşturulmaz.
+## Minimal example
 
 ```dart
-final loaderType = MtnMinecraftLoaderType.fromName(' FABRIC ');
-// loaderType == MtnMinecraftLoaderType.fabric
+import 'dart:io';
+import 'package:minecraft_models/minecraft_models.dart';
 
-final loaderName = loaderType?.name; // 'fabric'
-final unsupported = MtnMinecraftLoaderType.fromName('unknown-loader'); // null
+Future<void> main() async {
+  final list = MtnMinecraftGameLoaderVersionList(
+    cacheDirectory: Directory.systemTemp.path,
+    loaderType: MtnMinecraftLoaderType.fabric,
+  );
+
+  final builds = await list.getFromMinecraftVersion('1.21.11');
+  if (list.error != MtnMinecraftError.none) {
+    stderr.writeln('Metadata warning: ${list.errorMessage}');
+  }
+
+  for (final build in builds) {
+    stdout.writeln('${build.version} — ${build.channel.name} — ${build.url}');
+  }
+}
 ```
 
-`fromName(String?)` bilinmeyen, boş veya null değeri `null` olarak döndürür.
-Yanlış bir kimlik hiçbir zaman otomatik olarak `vanilla` yapılmaz. `.name`
-Dart enum'unun kendi özelliğidir; ayrıca `toName` gerekmez. Cache dosya isimleri
-`loaderType.name` üzerinden oluşturulduğundan önceki `fabric.json`,
-`forge.json` vb. dosyalarla eşleşir.
-
-### Dahili loader helper'ları
-
-`MtnMinecraftGameLoaderVersionList` tek public giriş noktasıdır.
-`loaderType` parametresine göre Vanilla, Fabric, Forge, NeoForge veya Quilt
-helper'ını kendisi oluşturur. Helper'lar `MtnMinecraftGameLoaderVersionListHelper`
-sınıfından türetilir. Helper ve beş provider sınıfı, paket barrel export'una
-dahil değildir. Provider'ın upstream JSON/XML ayrıştırması ve endpoint'leri
-`lib/src/loaders/` altında kalır.
-
-```dart
-final cacheDirectory = Directory.systemTemp.path;
-
-var versionListFabric = MtnMinecraftGameLoaderVersionList(
-  cacheDirectory: cacheDirectory,
-  loaderType: MtnMinecraftLoaderType.fabric,
-);
-
-final versions = await versionListFabric.getFromMinecraftVersion('1.21.11');
-assert(versionListFabric.loaderType == MtnMinecraftLoaderType.fabric);
-```
-
-İlgili çağrı gerekiyorsa önce genel katalog yüklenir. Dahili helper'lar
-`doLoadFromWeb()` ve `doGenerateMinecraftVersionList(mcVersion, types)`
-metotlarını override eder; cache, HTTP ve hata durumları ana VersionList'e aittir.
-`MtnMinecraftGameLoaderVersion.fromRawData()` eklenmedi. Ham veri yorumlama
-ve loader'a özgü dönüşüm provider sorumluluğudur.
-
-### Beş provider'lı gerçek metadata örneği
+Use the existing [`example/game_loader_version_lists.dart`](example/game_loader_version_lists.dart) to query **all** `MtnMinecraftLoaderType.values` with one shared code path:
 
 ```powershell
 dart run example/game_loader_version_lists.dart 1.21.11
+dart run example/game_loader_version_lists.dart 1.21.1
 ```
 
-Örneğin `main()` metodu `MtnMinecraftLoaderType.values` üzerinde dönerek
-beş `MtnMinecraftGameLoaderVersionList` nesnesi oluşturur. Yeni loader türleri
-elle yazılmış ayrı değişkenler veya sabit listeler gerektirmez. Cache işletim
-sisteminin geçici klasörü altındadır; callback veya provider sınıfı tanımlanmaz.
+### Important usage rules
 
-Vanilla helper'ı Mojang manifest index'ini okur. Fabric ve Quilt helper'larının
-`doLoadFromWeb()` metotları desteklenen **Minecraft sürümü index kayıtlarını** tutar;
-bu kayıtların `version` alanı oyun sürümü kimliğidir, loader build değildir.
-Seçilen oyun için gerçek loader build ve JSON profile URL'leri
-`doGenerateMinecraftVersionList()` içerisinde elde edilir.
+- `load()` retrieves the broad catalog. `getFromMinecraftVersion(mcVersion, [types])` returns matching records; it initializes the catalog when necessary. For **Fabric and Quilt**, broad catalog `items` represent **supported Minecraft game versions**, not actual loader builds. Query a Minecraft version for those.
+- `MtnMinecraftGameLoaderVersion.type` is the **Minecraft game release type**; `.channel` is the **loader publication channel**. Neither `channel == unknown` nor `versions.first` guarantees a stable or preferred build.
+- `.url` is provider-specific: Mojang version JSON, Fabric/Quilt profile JSON, or Forge/NeoForge Maven installer JAR **candidate**. This package does **not** download/install game artifacts, verify checksums, select a guaranteed newest/stable build, or launch Minecraft.
+- `cacheDuration` defaults to one hour. Disk/network failures are best-effort and can return cached data or empty results; **inspect `list.error` after each operation**. Cache paths include `loaderType.name`; `MtnMinecraftLoaderType.fromName` returns `null` for unknown strings, never an implicit Vanilla default.
+- Use the exact upstream `version` and `url` when persisting or selecting records. `text` is only for display. The current model has **no SHA-1 field** or `fromRawData()` factory.
 
-Forge ve NeoForge sürümleri Maven metadata üzerinden ayrıştırılır. Onların
-`url` alanları JSON manifest değil, **installer JAR** kaynağıdır.
-Bu örnek kurulum, SHA-1 doğrulaması veya oyun çalıştırması yapmaz.
-Maven metadata'nın sayısal sürüm sıralaması yayın tarihi garantisi vermez;
-üretim ortamında "en yeni" kararı için sağlayıcı yayın bilgisinin teyidi gerekir.
+## Guide for other repositories
 
-## Proje durumu
+**[Consumer integration guide — MtnLauncher / Minecraft Tools](docs/continuity/CONSUMER_INTEGRATION.md)** provides the pinned Git dependency, full examples, architecture rationale, provider-result distinctions, cache/error behavior and separate consumer migration checklists. Read it **before** replacing duplicate types or upgrading launcher integrations.
 
-PR #6'nın önceki concrete-provider sözleşmesi Windows'ta doğrulandı ve `main`e
-merge edildi (40/40 test). PR #7 helper refaktörü ve `MtnMinecraftLoaderType.values`
-örneği için merge/cleanup onayı verildi; yeni sözleşmenin Windows analyzer/test
-ve canlı smoke doğrulaması ise henüz yapılmadı. Tüketici repository entegrasyonları
-ayrı checkpoint'lerdir.
+**[Current verified architecture and continuity](docs/continuity/CURRENT_TARGET.md)** is the authoritative project state. [Working rules](docs/WORKING_RULES.md) define approval, tests and coding constraints; archived pre-PR #7 continuity is explicitly historical.
+
+Consumer integration is **a separate approved checkpoint**. No changes to `mtn_launcher` or `minecraft_tools` are included here.
