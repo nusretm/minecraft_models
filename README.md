@@ -54,6 +54,29 @@ HTTP yanıt kodu gerekiyorsa `errorMessage` içinden okunabilir. Başarılı iş
 `MtnMinecraftError.none` durumuna döner. Cache ve indirme sorunları kullanılabilir
 liste verisini otomatik olarak geçersiz kılmaz.
 
+### Beş provider'lı gerçek metadata örneği
+
+```powershell
+dart run example/game_loader_version_lists.dart 1.21.11
+```
+
+Örneğin `main()` metodu Vanilla, Fabric, Quilt, Forge ve NeoForge için
+beş ayrı `MtnMinecraftGameLoaderVersionList` oluşturur. Cache işletim
+sisteminin geçici klasörü altındadır; `onGenerateMinecraftVersionList` callback'i
+`(list, mcVersion, types)` sözleşmesini kullanır.
+
+Vanilla Mojang manifest index'ini okur. Fabric ve Quilt'in `onLoadFromWeb`
+callback'leri desteklenen **Minecraft sürümü index kayıtlarını** tutar;
+bu kayıtların `version` alanı oyun sürümü kimliğidir, loader build değildir.
+Seçilen oyun için gerçek loader build ve JSON profile URL'leri yalnızca
+`onGenerateMinecraftVersionList` içerisinde elde edilir.
+
+Forge ve NeoForge sürümleri Maven metadata üzerinden ayrıştırılır. Onların
+`url` alanları JSON manifest değil, **installer JAR** kaynağıdır.
+Bu örnek kurulum, SHA-1 doğrulaması veya oyun çalıştırması yapmaz.
+Maven metadata'nın sayısal sürüm sıralaması yayın tarihi garantisi vermez;
+üretim ortamında "en yeni" kararı için sağlayıcı yayın bilgisinin teyidi gerekir.
+
 ## Proje durumu
 
 MOD-1 foundation modelleri `main` branch'indedir. VersionList dayanıklılık düzeltmeleri

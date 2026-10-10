@@ -15,6 +15,9 @@ Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98`
 - Deliberately non-fatal HTTP/cache failures remain non-fatal to callers. Preserve HTTP failure classification and descriptive messages, reset diagnostics on success, provide cache write diagnostics, handle filesystem metadata exceptions, retry malformed caches from the provider, and use valid expired cache after a failed refresh.
 - Filter returned loader builds by requested Minecraft version and types; do not reorder provider results, whose first element is already the newest compatible published build.
 - Public barrel exports the generic VersionList. It never downloads game artifacts, verifies SHA-1, installs loaders or runs Minecraft.
+- A five-provider live-metadata example now lives at `example/game_loader_version_lists.dart` (Vanilla, Fabric, Quilt, Forge, NeoForge). The provider-specific callback takes `(list, mcVersion, types)` and stays in `example/`. Its Forge/NeoForge source URL points to a Maven installer artifact rather than a JSON profile.
+- The Fabric/Quilt general cache contains supported Minecraft-version index records (the `version` is the game identifier), while the per-game callback returns actual compatible loader builds. This distinction should not be confused with a full loader build catalog from the first callback.
+- Four offline tests cover example parsing and one test confirms that requested `types` reaches the callback.
 - Focused regression tests and enum tests are authored but **not executed in this environment**. Windows `dart pub get`, `dart analyze`, `dart test`, source diff review and explicit merge approval remain outstanding.
 - The subsequent LVL-I3A section records older model/history and should not be mistaken for evidence of SHA-1 support in the current renamed `MtnMinecraftGameLoaderVersion`.
 

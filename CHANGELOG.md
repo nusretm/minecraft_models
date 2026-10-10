@@ -1,3 +1,8 @@
+## Unreleased — Five-loader upstream metadata example
+- Add a single `main()` creating Vanilla, Fabric, Quilt, Forge and NeoForge `MtnMinecraftGameLoaderVersionList` instances using their published metadata endpoints.
+- Forward `types` into the provider's `onGenerateMinecraftVersionList(list, mcVersion, types)` callback.
+- Add offline example parsing checks for Minecraft release types, Maven metadata, NeoForge version-family mapping and publication channels.
+
 ## Unreleased — Typed Minecraft error codes
 - Add `MtnMinecraftError` with grouped cache/download codes, `fromIndex/fromCode` and group checks.
 - Use `_setError(MtnMinecraftError, [message])` to centralize typed error updates; keep `errorCode` and `errorMessage`, remove separate HTTP status.
