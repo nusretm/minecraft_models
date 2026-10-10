@@ -50,7 +50,7 @@ modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılm
 `MtnMinecraftError`, cache ve download sorunlarını sayısal olarak gruplar.
 `MtnMinecraftGameLoaderVersionList.error` tipli hata değeridir;
 `errorCode` aynı enum'un `.code` değerini verir. `errorMessage` ayrıntıyı,
-`httpStatusCode` ise varsa gerçek HTTP durumunu taşır. Başarılı işlemler
+HTTP yanıt kodu gerekiyorsa `errorMessage` içinden okunabilir. Başarılı işlemler
 `MtnMinecraftError.none` durumuna döner. Cache ve indirme sorunları kullanılabilir
 liste verisini otomatik olarak geçersiz kılmaz.
 

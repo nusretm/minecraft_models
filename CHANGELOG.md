@@ -1,6 +1,6 @@
 ## Unreleased — Typed Minecraft error codes
 - Add `MtnMinecraftError` with grouped cache/download codes, `fromIndex/fromCode` and group checks.
-- Replace VersionList's numeric setter with typed diagnostics; retain `errorCode`, `errorMessage` and separate HTTP status.
+- Use `_setError(MtnMinecraftError, [message])` to centralize typed error updates; keep `errorCode` and `errorMessage`, remove separate HTTP status.
 - Keep recoverable cache/download errors non-fatal and preserve existing loader/version class names.
 
 ## Unreleased — Generic VersionList resilience

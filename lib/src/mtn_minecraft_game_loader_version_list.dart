@@ -31,27 +31,27 @@ class MtnMinecraftGameLoaderVersionList {
 
   MtnMinecraftError _error = MtnMinecraftError.none;
   String _errorMessage = '';
-  int? _httpStatusCode;
 
   MtnMinecraftError get error => _error;
   int get errorCode => _error.code;
   String get errorMessage => _errorMessage;
-  int? get httpStatusCode => _httpStatusCode;
+
+  void _setError(MtnMinecraftError error, [String message='']) {
+    _error = error;
+    _errorMessage = message;
+  }
 
   /// HTTP requests are performed here so all loaders share error reporting.
   /// Errors are recorded and thrown: the caller's callback needs no try/catch.
   Future<String> downloadUrl(String url) async {
-    _error = MtnMinecraftError.none;
-    _errorMessage = '';
-    _httpStatusCode = null;
+    _setError(MtnMinecraftError.none);
 
     Uri uri;
     try {
       uri = Uri.parse(url);
       if (uri.scheme != 'https' && uri.scheme != 'http') throw FormatException('Unsupported URL scheme: ${uri.scheme}');
     } catch (error) {
-      _error = MtnMinecraftError.downloadInvalidUrl;
-      _errorMessage = 'Invalid URL: $error';
+      _setError(MtnMinecraftError.downloadInvalidUrl, 'Invalid URL: $error');
       rethrow;
     }
 
@@ -62,33 +62,25 @@ class MtnMinecraftGameLoaderVersionList {
       }).timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {
-        _error = MtnMinecraftError.downloadHttpFailed;
-        _httpStatusCode = response.statusCode;
-        _errorMessage = 'HTTP ${response.statusCode}: $uri';
+        _setError(MtnMinecraftError.downloadHttpFailed, 'HTTP ${response.statusCode}: $uri');
         throw HttpException(errorMessage, uri: uri);
       }
       final result = utf8.decode(response.bodyBytes);
-      _error = MtnMinecraftError.none;
-      _errorMessage = '';
-      _httpStatusCode = null;
+      _setError(MtnMinecraftError.none);
       return result;
     } on HttpException {
       rethrow;
     } on TimeoutException catch (error) {
-      _error = MtnMinecraftError.downloadTimeout;
-      _errorMessage = 'Request timed out: $uri ($error)';
+      _setError(MtnMinecraftError.downloadTimeout, 'Request timed out: $uri ($error)');
       rethrow;
     } on SocketException catch (error) {
-      _error = MtnMinecraftError.downloadNetworkFailed;
-      _errorMessage = 'Network error: $uri ($error)';
+      _setError(MtnMinecraftError.downloadNetworkFailed, 'Network error: $uri ($error)');
       rethrow;
     } on http.ClientException catch (error) {
-      _error = MtnMinecraftError.downloadClientFailed;
-      _errorMessage = 'HTTP client error: $uri ($error)';
+      _setError(MtnMinecraftError.downloadClientFailed, 'HTTP client error: $uri ($error)');
       rethrow;
     } catch (error) {
-      _error = MtnMinecraftError.downloadFailed;
-      _errorMessage = 'Download failed: $uri ($error)';
+      _setError(MtnMinecraftError.downloadFailed, 'Download failed: $uri ($error)');
       rethrow;
     }
   }
@@ -130,28 +122,22 @@ class MtnMinecraftGameLoaderVersionList {
     final cacheFile = MtnMinecraftGameLoaderVersionListCache(versionList: this, mcVersion: mcVersion, types: types);
     final cached = cacheFile.load();
     if (cached != null) {
-      _error = MtnMinecraftError.none;
-      _errorMessage = '';
-      _httpStatusCode = null;
+      _setError(MtnMinecraftError.none);
       return cached.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
     }
 
-    _error = MtnMinecraftError.none;
-    _errorMessage = '';
-    _httpStatusCode = null;
+    _setError(MtnMinecraftError.none);
     try {
       final loaded = await onGenerateMinecraftVersionList(this, mcVersion);
       final result = loaded.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
       cacheFile.save(result);
       if (cacheFile.error != MtnMinecraftError.none) {
-        _error = cacheFile.error;
-        _errorMessage = cacheFile.errorMessage ?? '';
+        _setError(cacheFile.error, cacheFile.errorMessage ?? '');
       }
       return result;
     } catch (error) {
       if (_error == MtnMinecraftError.none) {
-        _error = MtnMinecraftError.downloadFailed;
-        _errorMessage = 'Loader version discovery failed: $error';
+        _setError(MtnMinecraftError.downloadFailed, 'Loader version discovery failed: $error');
       }
       final stale = cacheFile.load(includeExpired: true);
       if (stale != null) return stale.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
@@ -165,26 +151,20 @@ class MtnMinecraftGameLoaderVersionList {
     final cached = cacheFile.load();
     if (cached != null) {
       _items = cached;
-      _error = MtnMinecraftError.none;
-      _errorMessage = '';
-      _httpStatusCode = null;
+      _setError(MtnMinecraftError.none);
       return _items;
     }
 
-    _error = MtnMinecraftError.none;
-    _errorMessage = '';
-    _httpStatusCode = null;
+    _setError(MtnMinecraftError.none);
     try {
       _items = await onLoadFromWeb(this);
       cacheFile.save(_items);
       if (cacheFile.error != MtnMinecraftError.none) {
-        _error = cacheFile.error;
-        _errorMessage = cacheFile.errorMessage ?? '';
+        _setError(cacheFile.error, cacheFile.errorMessage ?? '');
       }
     } catch (error) {
       if (_error == MtnMinecraftError.none) {
-        _error = MtnMinecraftError.downloadFailed;
-        _errorMessage = 'Loader catalog refresh failed: $error';
+        _setError(MtnMinecraftError.downloadFailed, 'Loader catalog refresh failed: $error');
       }
       if (_items.isEmpty) _items = cacheFile.load(includeExpired: true) ?? _items;
     }

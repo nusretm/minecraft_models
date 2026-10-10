@@ -125,7 +125,7 @@ void main() {
     expect(File('${root.path}/cache/fabric-..%2Fcustom.json').existsSync(), isTrue);
   });
 
-  test('HTTP status survives catch and successful HTTP clears the error', () async {
+  test('HTTP classification retains status in message and success clears the error', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     server.listen((request) async {
       if (request.uri.path == '/not-found') request.response.statusCode = 404;
@@ -143,11 +143,10 @@ void main() {
       await expectLater(list.downloadUrl('http://127.0.0.1:${server.port}/not-found'), throwsA(isA<HttpException>()));
       expect(list.error, MtnMinecraftError.downloadHttpFailed);
       expect(list.errorCode, MtnMinecraftError.downloadHttpFailed.code);
-      expect(list.httpStatusCode, 404);
+      expect(list.errorMessage, contains('HTTP 404'));
       expect(await list.downloadUrl('http://127.0.0.1:${server.port}/ok'), 'test');
       expect(list.error, MtnMinecraftError.none);
       expect(list.errorCode, MtnMinecraftError.none.code);
-      expect(list.httpStatusCode, isNull);
       expect(list.errorMessage, '');
     } finally {
       await server.close(force: true);

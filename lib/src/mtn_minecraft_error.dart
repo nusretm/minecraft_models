@@ -1,5 +1,5 @@
 /// Typed status for generic Minecraft loader catalog and cache operations.
-/// The enum code is not an HTTP status code; HTTP status is recorded separately.
+/// The enum code is not an HTTP status code; the HTTP status can be included in the error message.
 enum MtnMinecraftError {
   none                  (0),
   unknown               (1),
