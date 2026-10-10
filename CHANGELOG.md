@@ -1,3 +1,10 @@
+## Unreleased — Internal loader helpers and single public VersionList
+- Make `MtnMinecraftGameLoaderVersionList` constructible: callers provide `cacheDirectory` and `loaderType`.
+- Add internal abstract `MtnMinecraftGameLoaderVersionListHelper` with `versionList` ownership reference and two provider override hooks.
+- Convert five loader implementations to internal helper subclasses, selected lazily by the public VersionList.
+- Stop barrel-exporting the helper and five provider classes. Keep `MtnMinecraftGameLoaderVersion` as the unchanged public value model.
+- Preserve central cache/HTTP/error lifecycle and existing filenames. Adapt example and offline provider/lifecycle fixtures to public dispatch.
+
 ## Unreleased — Canonical Minecraft loader type
 - Export `MtnMinecraftLoaderType` (vanilla, fabric, forge, neoforge, quilt) from `minecraft_models.dart` for shared launcher use.
 - Add a case-insensitive, whitespace-tolerant `fromName(String?)`; unknown values return null, not Vanilla.

@@ -4,8 +4,21 @@ Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
 Feature baseline `main` HEAD: `f7649860787f261460e3495bb174e4902aa51f1d`
-Active checkpoint: **Canonical loader enum + concrete provider VersionList architecture, [PR #6](https://github.com/nusretm/minecraft_models/pull/6) — Windows verified, merge and cleanup explicitly approved (2026-10-10)**
+Active checkpoint: **Refactor VersionList to internal loader helpers — approved implementation on `refactor/version-list-internal-loader-helpers`; post-refactor Windows validation pending; merge NOT approved (2026-10-10)**
 Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
+
+## Internal loader helpers — in progress (2026-10-10)
+
+- Baseline `main`: `8dcaedbee9c2bb4afadcd9a2e7dbecf98ffd2930` (squash merge of PR #6; user confirmed clean and synchronized after deleting local and remote feature branches).
+- User explicitly approved implementation of this design after planning; **no merge approval yet**. Work branch: `refactor/version-list-internal-loader-helpers`.
+- Public `MtnMinecraftGameLoaderVersionList({required cacheDirectory, required loaderType, cacheDuration})` is now constructible, not abstract. It retains the `items`, `load()`, `getFromMinecraftVersion()`, `downloadUrl()`, `sortItems()`, typed errors and cache lifecycle.
+- New `MtnMinecraftGameLoaderVersionListHelper` is an **internal abstract class**, with constructor `(MtnMinecraftGameLoaderVersionList versionList)`, and override hooks `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`.
+- Internal loader implementations `MtnMinecraftGameLoaderVersionListVanilla/Fabric/Forge/NeoForge/Quilt` now **extend Helper**, not VersionList. Each helper gets its owning `versionList` and calls its public `downloadUrl()`, `items` or `sortItems()` as needed. No helper has independent cache/error/HTTP state.
+- VersionList privately dispatches by exhaustive `switch(loaderType)`, lazily creating one helper. Keep helper and five concrete loader classes **out of `lib/minecraft_models.dart` exports**. `MtnMinecraftGameLoaderVersion` remains the public immutable data model, unmodified.
+- No loader name/string conversions or provider callback constructors. No new dependencies. Metadata ordering, cache filenames based on `loaderType.name`, error/fallback behavior and provider sources should remain unchanged.
+- Example and offline tests are adapted to public VersionList dispatch. **Dart SDK not available in authoring runtime: post-change `dart analyze`, `dart test`, live Vanilla/Fabric/Quilt/Forge/NeoForge smoke and diff validation require Windows execution before considering merge.**
+- PR #6's 40 passing tests and live smoke are evidence for the **previous** architecture, not for this new refactor.
+- Separate consumer integrations into `mtn_launcher` / `minecraft_tools` are not part of this branch.
 
 ## PR #6 — Windows verification and closure gate (2026-10-10)
 
@@ -65,17 +78,17 @@ Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98`
 
 ## Project objective
 
-Provide shared pure-Dart Minecraft model identity, a typed loader identity enum and the abstract `MtnMinecraftGameLoaderVersionList` with concrete Vanilla/Fabric/Quilt/Forge/NeoForge providers. The base class owns best-effort HTTP metadata/cache handling; provider subclasses own wire parsing. Artifact installation, UI and game launch remain outside this package.
+Provide shared pure-Dart Minecraft model identity, a typed loader identity enum and one public constructible `MtnMinecraftGameLoaderVersionList` that delegates provider-specific discovery to internal Vanilla/Fabric/Quilt/Forge/NeoForge helpers. VersionList owns best-effort HTTP metadata/cache handling; helper subclasses own wire parsing. Artifact installation, UI and game launch remain outside this package.
 
 ## Implemented foundation contracts
 
 1. `MtnMinecraftGameVersionType` — eight-value Minecraft game-version enum.
 2. `MtnMinecraftGameLoaderChannel` — independent loader publication channel enum.
 3. `MtnMinecraftGameLoaderVersion` — immutable build identity with exact version/URL, type, channel and JSON/equality.
-4. `MtnMinecraftGameLoaderVersionList` — abstract catalog/cache/HTTP base; provider overrides load and generate version lists, preserving provider order.
+4. `MtnMinecraftGameLoaderVersionList` — public constructible catalog/cache/HTTP facade dispatching to internal helpers; preserves provider order.
 5. `MtnMinecraftGameLoaderVersionListCache` — best-effort JSON persistence with non-fatal read/write failures.
 6. `MtnMinecraftLoaderType` — canonical Vanilla/Fabric/Forge/NeoForge/Quilt enum with safe `fromName()`.
-7. Five exported concrete VersionList provider implementations.
+7. One internal helper base and five non-exported concrete provider helpers.
 
 The loader build constructor defaults `channel` to `unknown`. JSON requires
 non-empty `mcVersion`, `version`, `url`, and `type` strings. An absent `channel`

@@ -32,14 +32,14 @@ bu davranışlar ilgili uygulamalarda kalmalıdır.
 
 ## Kullanım
 
-Paketin tek public API giriş noktası kullanılır. `MtnMinecraftGameLoaderVersionList` ortak base sınıftır; beş hazır provider sınıfı loader sürüm indeksini sunar, cache ve metadata hataları kullanılabilir veriyi kaybettirmez:
+Paketin tek public API giriş noktası kullanılır. `MtnMinecraftGameLoaderVersionList` somut bir sınıftır; loader türüne göre dahili helper seçer. Cache ve metadata hataları kullanılabilir veriyi kaybettirmez:
 
 ```dart
 import 'package:minecraft_models/minecraft_models.dart';
 ```
 
 Güncel public API Minecraft sürüm tipi ve loader build channel enum'larını,
-immutable loader build modelini ve abstract `MtnMinecraftGameLoaderVersionList` ile beş provider sınıfını içerir. Loader build modeli exact upstream version ve URL
+immutable loader build modelini ve somut `MtnMinecraftGameLoaderVersionList` sınıfını içerir. Loader build modeli exact upstream version ve URL
 değerlerini değiştirmeden saklar. Genel VersionList, provider override sonuçlarını
 ve best-effort cache'i yönetir. Loader'a özel JSON/XML parsing ise provider sınıflarındadır.
 Mevcut `MtnMinecraftGameLoaderVersion`
@@ -73,30 +73,32 @@ Dart enum'unun kendi özelliğidir; ayrıca `toName` gerekmez. Cache dosya isiml
 `loaderType.name` üzerinden oluşturulduğundan önceki `fabric.json`,
 `forge.json` vb. dosyalarla eşleşir.
 
-### Yerleşik VersionList provider sınıfları
+### Dahili loader helper'ları
 
-Bu pakette `MtnMinecraftGameLoaderVersionList` ortak abstract temel sınıftır.
-Provider'a özel JSON/XML ayrıştırma, endpoint'ler ve sürüm eşleştirme
-`lib/src/loaders/` altında Vanilla, Fabric, Quilt, Forge ve NeoForge
-sınıflarındadır. Uygulamalar callback, `loaderType` veya parser tanımlamak
-zorunda değildir; her provider kendi enum değerini sabitler:
+`MtnMinecraftGameLoaderVersionList` tek public giriş noktasıdır.
+`loaderType` parametresine göre Vanilla, Fabric, Forge, NeoForge veya Quilt
+helper'ını kendisi oluşturur. Helper'lar `MtnMinecraftGameLoaderVersionListHelper`
+sınıfından türetilir. Helper ve beş provider sınıfı, paket barrel export'una
+dahil değildir. Provider'ın upstream JSON/XML ayrıştırması ve endpoint'leri
+`lib/src/loaders/` altında kalır.
+
+
 
 ```dart
 final cacheDirectory = Directory.systemTemp.path;
 
-var versionListVanilla = MtnMinecraftGameLoaderVersionListVanilla(cacheDirectory: cacheDirectory);
-var versionListFabric = MtnMinecraftGameLoaderVersionListFabric(cacheDirectory: cacheDirectory);
-var versionListQuilt = MtnMinecraftGameLoaderVersionListQuilt(cacheDirectory: cacheDirectory);
-var versionListForge = MtnMinecraftGameLoaderVersionListForge(cacheDirectory: cacheDirectory);
-var versionListNeoForge = MtnMinecraftGameLoaderVersionListNeoForge(cacheDirectory: cacheDirectory);
+var versionListFabric = MtnMinecraftGameLoaderVersionList(
+  cacheDirectory: cacheDirectory,
+  loaderType: MtnMinecraftLoaderType.fabric,
+);
 
 final versions = await versionListFabric.getFromMinecraftVersion('1.21.11');
 assert(versionListFabric.loaderType == MtnMinecraftLoaderType.fabric);
 ```
 
-İlgili çağrı gerekiyorsa önce genel katalogu yükler. Her provider `doLoadFromWeb()`
-ve `doGenerateMinecraftVersionList(mcVersion, types)` metodlarını override eder;
-bunlar artık public constructor callback parametresi değildir.
+İlgili çağrı gerekiyorsa önce genel katalog yüklenir. Dahili helper'lar
+`doLoadFromWeb()` ve `doGenerateMinecraftVersionList(mcVersion, types)`
+metotlarını override eder; cache, HTTP ve hata durumları ana VersionList'e aittir.
 `MtnMinecraftGameLoaderVersion.fromRawData()` eklenmedi. Ham veri yorumlama
 ve loader'a özgü dönüşüm provider sorumluluğudur.
 
@@ -106,12 +108,13 @@ ve loader'a özgü dönüşüm provider sorumluluğudur.
 dart run example/game_loader_version_lists.dart 1.21.11
 ```
 
-Örneğin `main()` metodu Vanilla, Fabric, Quilt, Forge ve NeoForge'un beş
-hazır sınıfını oluşturur. Cache işletim sisteminin geçici klasörü altındadır;
-uygulamanın callback tanımlaması gerekmez.
+Örneğin `main()` metodu Vanilla, Fabric, Quilt, Forge ve NeoForge için
+beş `MtnMinecraftGameLoaderVersionList` nesnesi oluşturur; her birinin
+`loaderType` değeri farklıdır. Cache işletim sisteminin geçici klasörü
+altındadır; uygulamanın callback veya provider sınıfı tanımlaması gerekmez.
 
-Vanilla Mojang manifest index'ini okur. Fabric ve Quilt'in `doLoadFromWeb()`
-metotları desteklenen **Minecraft sürümü index kayıtlarını** tutar;
+Vanilla helper'ı Mojang manifest index'ini okur. Fabric ve Quilt helper'larının
+`doLoadFromWeb()` metotları desteklenen **Minecraft sürümü index kayıtlarını** tutar;
 bu kayıtların `version` alanı oyun sürümü kimliğidir, loader build değildir.
 Seçilen oyun için gerçek loader build ve JSON profile URL'leri
 `doGenerateMinecraftVersionList()` içerisinde elde edilir.
@@ -124,7 +127,7 @@ Maven metadata'nın sayısal sürüm sıralaması yayın tarihi garantisi vermez
 
 ## Proje durumu
 
-VersionList, beş somut provider ve ortak loader enum'u için Windows doğrulaması
-başarılıdır (`dart analyze` temiz, `dart test` 40/40 geçti; Minecraft 1.21.11
-canlı katalog örneği beş loader için sonuç döndürdü). PR #6 merge ve cleanup
-onayı alınmıştır. Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
+PR #6'nın eski concrete-provider sözleşmesi Windows'ta doğrulandı ve `main`e
+merge edildi (40/40 test). Güncel helper refaktörü ayrı feature branch'tedir;
+yeni sözleşmenin analyzer/test ve canlı smoke doğrulaması henüz yapılmadı.
+Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
