@@ -1,5 +1,4 @@
 import '../mtn_minecraft_game_version_type.dart';
-import 'dart:convert';
 
 import '../mtn_minecraft_game_loader_version.dart';
 import '../mtn_minecraft_game_loader_version_list.dart';
