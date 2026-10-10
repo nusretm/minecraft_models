@@ -1,3 +1,8 @@
+## Unreleased — Typed Minecraft error codes
+- Add `MtnMinecraftError` with grouped cache/download codes, `fromIndex/fromCode` and group checks.
+- Replace VersionList's numeric setter with typed diagnostics; retain `errorCode`, `errorMessage` and separate HTTP status.
+- Keep recoverable cache/download errors non-fatal and preserve existing loader/version class names.
+
 ## Unreleased — Generic VersionList resilience
 - Keep existing `MtnMinecraftGameLoaderVersionList` and cache classes; non-fatal cache/network handling, valid-stale fallback, Minecraft type filtering and HTTP/cache diagnostics.
 - Expose the generic VersionList through the package public API without implementing artifact downloads or launcher orchestration.

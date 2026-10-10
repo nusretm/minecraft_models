@@ -41,7 +41,8 @@ void main() {
     expect(await list.load(), [release]);
     expect(calls, 1);
     expect(File('${root.path}/cache/fabric.json').existsSync(), isTrue);
-    expect(list.errorCode, 0);
+    expect(list.error, MtnMinecraftError.none);
+    expect(list.errorCode, MtnMinecraftError.none.code);
     expect(list.errorMessage, '');
   });
 
@@ -59,7 +60,8 @@ void main() {
     expect(await list.load(), [release]);
     expect(calls, 1);
     expect(jsonDecode(File('${cache.path}/vanilla.json').readAsStringSync()), isA<List>());
-    expect(list.errorCode, 0);
+    expect(list.error, MtnMinecraftError.none);
+    expect(list.errorCode, MtnMinecraftError.none.code);
   });
 
   test('expired valid cache is reused after provider failure with diagnostic', () async {
@@ -74,7 +76,9 @@ void main() {
     );
 
     expect(await list.load(), [release]);
-    expect(list.errorCode, -2);
+    expect(list.error, MtnMinecraftError.downloadFailed);
+    expect(list.errorCode, MtnMinecraftError.downloadFailed.code);
+    expect(MtnMinecraftError.isDownloadError(list.error), isTrue);
     expect(list.errorMessage, contains('Offline'));
   });
 
@@ -103,7 +107,9 @@ void main() {
     );
 
     expect(await list.load(), [release]);
-    expect(list.errorCode, -1);
+    expect(list.error, MtnMinecraftError.cacheWriteFailed);
+    expect(list.errorCode, MtnMinecraftError.cacheWriteFailed.code);
+    expect(MtnMinecraftError.isCacheError(list.error), isTrue);
     expect(list.errorMessage, contains('Cache write error'));
   });
 
@@ -135,9 +141,13 @@ void main() {
 
     try {
       await expectLater(list.downloadUrl('http://127.0.0.1:${server.port}/not-found'), throwsA(isA<HttpException>()));
-      expect(list.errorCode, 404);
+      expect(list.error, MtnMinecraftError.downloadHttpFailed);
+      expect(list.errorCode, MtnMinecraftError.downloadHttpFailed.code);
+      expect(list.httpStatusCode, 404);
       expect(await list.downloadUrl('http://127.0.0.1:${server.port}/ok'), 'test');
-      expect(list.errorCode, 0);
+      expect(list.error, MtnMinecraftError.none);
+      expect(list.errorCode, MtnMinecraftError.none.code);
+      expect(list.httpStatusCode, isNull);
       expect(list.errorMessage, '');
     } finally {
       await server.close(force: true);
@@ -156,6 +166,8 @@ void main() {
     );
 
     expect(await list.getFromMinecraftVersion('1.21.11', [MtnMinecraftGameVersionType.release]), [release]);
-    expect(list.errorCode, -2);
+    expect(list.error, MtnMinecraftError.downloadFailed);
+    expect(list.errorCode, MtnMinecraftError.downloadFailed.code);
+    expect(MtnMinecraftError.isDownloadError(list.error), isTrue);
   });
 }

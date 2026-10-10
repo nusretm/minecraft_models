@@ -7,14 +7,15 @@ Feature baseline `main` HEAD: `f7649860787f261460e3495bb174e4902aa51f1d`
 Active checkpoint: **Generic VersionList resilience, [draft PR #6](https://github.com/nusretm/minecraft_models/pull/6) — Windows validation pending, merge not approved**
 Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
 
-## VersionList resilience — 2026-10-10
+## VersionList resilience and typed diagnostics — 2026-10-10
 
 - Branch: `fix/game-loader-version-list-resilience`, based on `f764986`.
 - Keep `MtnMinecraftGameLoaderVersionList` and `MtnMinecraftGameLoaderVersionListCache` names and public callback contracts unchanged. They represent a generic Minecraft game-loader version index, not a launcher-specific implementation.
+- Add `lib/src/mtn_minecraft_error.dart` with `MtnMinecraftError.none`, `unknown`, 1000-range cache failures and 2000-range download failures; preserve `fromIndex`, `fromCode`, `isCacheError`, `isDownloadError`. `VersionList.error` is typed; `errorCode` derives from `.code`, and `httpStatusCode` retains raw HTTP status.
 - Deliberately non-fatal HTTP/cache failures remain non-fatal to callers. Preserve HTTP statuses, reset diagnostics on success, provide cache write diagnostics, handle filesystem metadata exceptions, retry malformed caches from the provider, and use valid expired cache after a failed refresh.
 - Filter returned loader builds by requested Minecraft version and types; do not reorder provider results, whose first element is already the newest compatible published build.
 - Public barrel exports the generic VersionList. It never downloads game artifacts, verifies SHA-1, installs loaders or runs Minecraft.
-- Focused regression tests are authored but **not executed in this environment**. Windows `dart pub get`, `dart analyze`, `dart test`, source diff review and explicit merge approval remain outstanding.
+- Focused regression tests and enum tests are authored but **not executed in this environment**. Windows `dart pub get`, `dart analyze`, `dart test`, source diff review and explicit merge approval remain outstanding.
 - The subsequent LVL-I3A section records older model/history and should not be mistaken for evidence of SHA-1 support in the current renamed `MtnMinecraftGameLoaderVersion`.
 
 ## Historical LVL-I3A — Optional source SHA-1 metadata (2026-10-10)

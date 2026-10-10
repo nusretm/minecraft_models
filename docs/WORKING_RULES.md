@@ -28,6 +28,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
 - Providers own their newest-first source catalog and build ordering. VersionList preserves that order, filters Minecraft version/type, and performs best-effort metadata/cache access; exact/default loader choice and launcher orchestration belong to consumers.
+- Use `MtnMinecraftError` for cache (1000-range) and download (2000-range) failures. Successful operations use `none(0)`. Expose the typed error plus its numeric code/message; preserve HTTP status in `httpStatusCode` instead of treating raw HTTP codes as enum identifiers. Non-fatal failures must not prevent using available catalog data.
 
 ## Naming and architecture
 

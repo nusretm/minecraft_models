@@ -45,6 +45,15 @@ değerlerini değiştirmeden saklar. Genel VersionList ise loader'a özel JSON f
 callback sonuçlarını ve best-effort cache'i yönetir. Mevcut `MtnMinecraftGameLoaderVersion`
 modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılmaz.
 
+### Hata yönetimi
+
+`MtnMinecraftError`, cache ve download sorunlarını sayısal olarak gruplar.
+`MtnMinecraftGameLoaderVersionList.error` tipli hata değeridir;
+`errorCode` aynı enum'un `.code` değerini verir. `errorMessage` ayrıntıyı,
+`httpStatusCode` ise varsa gerçek HTTP durumunu taşır. Başarılı işlemler
+`MtnMinecraftError.none` durumuna döner. Cache ve indirme sorunları kullanılabilir
+liste verisini otomatik olarak geçersiz kılmaz.
+
 ## Proje durumu
 
 MOD-1 foundation modelleri `main` branch'indedir. VersionList dayanıklılık düzeltmeleri
