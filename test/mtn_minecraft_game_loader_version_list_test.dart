@@ -205,4 +205,17 @@ void main() {
     expect(seenTypes, [MtnMinecraftGameVersionType.release]);
     expect(result, [release]);
   });
+
+  test('failed catalog refresh does not cache a misleading empty version list', () async {
+    final list = _TestVersionList(
+      cacheDirectory: root.path,
+      loaderName: 'offline',
+      onLoadFromWeb: (_) async => throw const SocketException('offline'),
+      onGenerateMinecraftVersionList: (_, __, ___) async => [],
+    );
+
+    expect(await list.getFromMinecraftVersion('1.21.11'), isEmpty);
+    expect(list.error, MtnMinecraftError.downloadFailed);
+    expect(File('${root.path}/offline-1.21.11.json').existsSync(), isFalse);
+  });
 }

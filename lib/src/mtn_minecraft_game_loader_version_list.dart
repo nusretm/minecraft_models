@@ -131,7 +131,15 @@ abstract class MtnMinecraftGameLoaderVersionList {
     _setError(MtnMinecraftError.none);
     try {
       if (_items.isEmpty) await load();
+      final catalogError = _error;
+      final catalogErrorMessage = _errorMessage;
       final loaded = await doGenerateMinecraftVersionList(mcVersion, types);
+      // A failed catalog refresh is not a legitimate empty version list.
+      // Keep it retryable instead of persisting a misleading empty cache file.
+      if (_items.isEmpty && catalogError != MtnMinecraftError.none && loaded.isEmpty) {
+        if (_error == MtnMinecraftError.none) _setError(catalogError, catalogErrorMessage);
+        return [];
+      }
       final result = loaded.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
       cacheFile.save(result);
       if (cacheFile.error != MtnMinecraftError.none) {
