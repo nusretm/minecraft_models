@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 
 import 'mtn_minecraft_error.dart';
@@ -40,6 +40,9 @@ class MtnMinecraftGameLoaderVersionList {
 
   List<MtnMinecraftGameLoaderVersion> _items = [];
   List<MtnMinecraftGameLoaderVersion> get items => UnmodifiableListView(_items);
+
+  MtnMinecraftGameLoaderVersion? getFromVersionStr(String version) =>
+      _items.firstWhereOrNull((item) => item.version == version);
 
   MtnMinecraftError _error = MtnMinecraftError.none;
   String _errorMessage = '';
