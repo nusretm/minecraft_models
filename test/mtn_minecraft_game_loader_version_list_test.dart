@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 class _TestVersionList extends MtnMinecraftGameLoaderVersionList {
   _TestVersionList({
     required super.cacheDirectory,
-    required super.loaderName,
+    required super.loaderType,
     required this.onLoadFromWeb,
     required this.onGenerateMinecraftVersionList,
   });
@@ -51,7 +51,7 @@ void main() {
     var calls = 0;
     final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
-      loaderName: 'fabric',
+      loaderType: MtnMinecraftLoaderType.fabric,
       onLoadFromWeb: (_) async { calls++; return [release]; },
       onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
@@ -71,7 +71,7 @@ void main() {
     var calls = 0;
     final list = _TestVersionList(
       cacheDirectory: cache.path,
-      loaderName: 'vanilla',
+      loaderType: MtnMinecraftLoaderType.vanilla,
       onLoadFromWeb: (_) async { calls++; return [release]; },
       onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
@@ -89,7 +89,7 @@ void main() {
     cached.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 2)));
     final list = _TestVersionList(
       cacheDirectory: cache.path,
-      loaderName: 'forge',
+      loaderType: MtnMinecraftLoaderType.forge,
       onLoadFromWeb: (_) async => throw StateError('Offline'),
       onGenerateMinecraftVersionList: (_, __, ___) async => throw StateError('Offline'),
     );
@@ -105,7 +105,7 @@ void main() {
     var calls = 0;
     final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
-      loaderName: 'fabric',
+      loaderType: MtnMinecraftLoaderType.fabric,
       onLoadFromWeb: (_) async => [release, snapshot],
       onGenerateMinecraftVersionList: (_, __, ___) async { calls++; return [snapshot, release]; },
     );
@@ -120,7 +120,7 @@ void main() {
     final parentFile = File('${root.path}/not-a-directory')..writeAsStringSync('occupied');
     final list = _TestVersionList(
       cacheDirectory: parentFile.path,
-      loaderName: 'quilt',
+      loaderType: MtnMinecraftLoaderType.quilt,
       onLoadFromWeb: (_) async => [release],
       onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
@@ -135,7 +135,7 @@ void main() {
   test('cache filenames do not interpret Minecraft IDs as path separators', () async {
     final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
-      loaderName: 'fabric',
+      loaderType: MtnMinecraftLoaderType.fabric,
       onLoadFromWeb: (_) async => [],
       onGenerateMinecraftVersionList: (_, __, ___) async => [],
     );
@@ -153,7 +153,7 @@ void main() {
     });
     final list = _TestVersionList(
       cacheDirectory: root.path,
-      loaderName: 'vanilla',
+      loaderType: MtnMinecraftLoaderType.vanilla,
       onLoadFromWeb: (_) async => [],
       onGenerateMinecraftVersionList: (_, __, ___) async => [],
     );
@@ -178,7 +178,7 @@ void main() {
     file.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 2)));
     final list = _TestVersionList(
       cacheDirectory: cache.path,
-      loaderName: 'forge',
+      loaderType: MtnMinecraftLoaderType.forge,
       onLoadFromWeb: (_) async => [],
       onGenerateMinecraftVersionList: (_, __, ___) async => throw StateError('Metadata unavailable'),
     );
@@ -192,7 +192,7 @@ void main() {
     List<MtnMinecraftGameVersionType>? seenTypes;
     final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
-      loaderName: 'type-filter',
+      loaderType: MtnMinecraftLoaderType.fabric,
       onLoadFromWeb: (_) async => [],
       onGenerateMinecraftVersionList: (_, game, types) async {
         expect(game, '1.21.11');
@@ -209,13 +209,13 @@ void main() {
   test('failed catalog refresh does not cache a misleading empty version list', () async {
     final list = _TestVersionList(
       cacheDirectory: root.path,
-      loaderName: 'offline',
+      loaderType: MtnMinecraftLoaderType.vanilla,
       onLoadFromWeb: (_) async => throw const SocketException('offline'),
       onGenerateMinecraftVersionList: (_, __, ___) async => [],
     );
 
     expect(await list.getFromMinecraftVersion('1.21.11'), isEmpty);
     expect(list.error, MtnMinecraftError.downloadFailed);
-    expect(File('${root.path}/offline-1.21.11.json').existsSync(), isFalse);
+    expect(File('${root.path}/vanilla-1.21.11.json').existsSync(), isFalse);
   });
 }

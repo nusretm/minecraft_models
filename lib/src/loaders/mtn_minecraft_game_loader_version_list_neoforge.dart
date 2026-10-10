@@ -1,4 +1,5 @@
 import '../mtn_minecraft_game_version_type.dart';
+import '../mtn_minecraft_loader_type.dart';
 
 import '../mtn_minecraft_game_loader_version.dart';
 import '../mtn_minecraft_game_loader_version_list.dart';
@@ -6,7 +7,7 @@ import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// NeoForge Maven metadata, including the optional historical 1.20.1 coordinate.
 class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListNeoForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderName: 'neoforge');
+  MtnMinecraftGameLoaderVersionListNeoForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.neoforge);
 
   static const String mavenBase = 'https://maven.neoforged.net/releases/net/neoforged/neoforge';
   static const String legacyMavenBase = 'https://maven.neoforged.net/releases/net/neoforged/forge';

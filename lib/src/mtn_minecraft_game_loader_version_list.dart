@@ -9,17 +9,18 @@ import 'mtn_minecraft_error.dart';
 import 'mtn_minecraft_game_loader_version.dart';
 import 'mtn_minecraft_game_loader_version_list_cache.dart';
 import 'mtn_minecraft_game_version_type.dart';
+import 'mtn_minecraft_loader_type.dart';
 
 /// Shared cache, HTTP, and lifecycle. Loader-specific parsing belongs to subclasses.
 abstract class MtnMinecraftGameLoaderVersionList {
   MtnMinecraftGameLoaderVersionList({
     required this.cacheDirectory,
-    required this.loaderName,
+    required this.loaderType,
     this.cacheDuration = const Duration(hours: 1),
   });
 
   final String cacheDirectory;
-  final String loaderName;
+  final MtnMinecraftLoaderType loaderType;
   final Duration cacheDuration;
 
   /// Loads the upstream catalog; the base class owns caching and error recovery.

@@ -32,7 +32,7 @@ class MtnMinecraftGameLoaderVersionListCache {
         for (final type in types!) res += "-${type.name}";
       }
     }
-    return "${versionList.cacheDirectory}/${Uri.encodeComponent(versionList.loaderName)}$res.json";
+    return "${versionList.cacheDirectory}/${Uri.encodeComponent(versionList.loaderType.name)}$res.json";
   }
 
   bool get available {

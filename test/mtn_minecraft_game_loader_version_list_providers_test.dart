@@ -78,11 +78,11 @@ void main() {
   });
 
   test('provider constructors expose fixed loader identities', () {
-    expect(MtnMinecraftGameLoaderVersionListVanilla(cacheDirectory: cache.path).loaderName, 'vanilla');
-    expect(MtnMinecraftGameLoaderVersionListFabric(cacheDirectory: cache.path).loaderName, 'fabric');
-    expect(MtnMinecraftGameLoaderVersionListQuilt(cacheDirectory: cache.path).loaderName, 'quilt');
-    expect(MtnMinecraftGameLoaderVersionListForge(cacheDirectory: cache.path).loaderName, 'forge');
-    expect(MtnMinecraftGameLoaderVersionListNeoForge(cacheDirectory: cache.path).loaderName, 'neoforge');
+    expect(MtnMinecraftGameLoaderVersionListVanilla(cacheDirectory: cache.path).loaderType, MtnMinecraftLoaderType.vanilla);
+    expect(MtnMinecraftGameLoaderVersionListFabric(cacheDirectory: cache.path).loaderType, MtnMinecraftLoaderType.fabric);
+    expect(MtnMinecraftGameLoaderVersionListQuilt(cacheDirectory: cache.path).loaderType, MtnMinecraftLoaderType.quilt);
+    expect(MtnMinecraftGameLoaderVersionListForge(cacheDirectory: cache.path).loaderType, MtnMinecraftLoaderType.forge);
+    expect(MtnMinecraftGameLoaderVersionListNeoForge(cacheDirectory: cache.path).loaderType, MtnMinecraftLoaderType.neoforge);
   });
 
   test('Vanilla direct query initializes catalog and groups release candidates', () async {

@@ -1,4 +1,5 @@
 import '../mtn_minecraft_game_version_type.dart';
+import '../mtn_minecraft_loader_type.dart';
 
 import '../mtn_minecraft_game_loader_version.dart';
 import '../mtn_minecraft_game_loader_version_list.dart';
@@ -6,7 +7,7 @@ import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// Forge Maven metadata. Version URLs are installer JAR candidates, not JSON.
 class MtnMinecraftGameLoaderVersionListForge extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderName: 'forge');
+  MtnMinecraftGameLoaderVersionListForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.forge);
 
   static const String mavenBase = 'https://maven.minecraftforge.net/net/minecraftforge/forge';
 

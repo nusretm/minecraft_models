@@ -1,4 +1,5 @@
 import '../mtn_minecraft_game_version_type.dart';
+import '../mtn_minecraft_loader_type.dart';
 import 'dart:convert';
 
 import '../mtn_minecraft_game_loader_version.dart';
@@ -7,7 +8,7 @@ import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// Quilt Meta API (game catalog and compatible loader builds).
 class MtnMinecraftGameLoaderVersionListQuilt extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListQuilt({required super.cacheDirectory, super.cacheDuration}) : super(loaderName: 'quilt');
+  MtnMinecraftGameLoaderVersionListQuilt({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.quilt);
 
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb() async {

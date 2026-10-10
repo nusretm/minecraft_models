@@ -1,4 +1,5 @@
 import '../mtn_minecraft_game_version_type.dart';
+import '../mtn_minecraft_loader_type.dart';
 import 'dart:convert';
 
 import '../mtn_minecraft_game_loader_version.dart';
@@ -7,7 +8,7 @@ import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// Fabric Meta API (game catalog and compatible loader builds).
 class MtnMinecraftGameLoaderVersionListFabric extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListFabric({required super.cacheDirectory, super.cacheDuration}) : super(loaderName: 'fabric');
+  MtnMinecraftGameLoaderVersionListFabric({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.fabric);
 
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb() async {
