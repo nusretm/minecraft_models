@@ -10,21 +10,23 @@ import 'mtn_minecraft_game_loader_version.dart';
 import 'mtn_minecraft_game_loader_version_list_cache.dart';
 import 'mtn_minecraft_game_version_type.dart';
 
-/// Shared cache and HTTP handling. Loader-specific parsing stays in onLoadFromWeb.
-class MtnMinecraftGameLoaderVersionList {
+/// Shared cache, HTTP, and lifecycle. Loader-specific parsing belongs to subclasses.
+abstract class MtnMinecraftGameLoaderVersionList {
   MtnMinecraftGameLoaderVersionList({
     required this.cacheDirectory,
     required this.loaderName,
-    required this.onLoadFromWeb,
-    required this.onGenerateMinecraftVersionList,
     this.cacheDuration = const Duration(hours: 1),
   });
 
   final String cacheDirectory;
   final String loaderName;
-  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list) onLoadFromWeb;
-  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list, String mcVersion, List<MtnMinecraftGameVersionType> types) onGenerateMinecraftVersionList;
   final Duration cacheDuration;
+
+  /// Loads the upstream catalog; the base class owns caching and error recovery.
+  Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb();
+
+  /// Discovers Minecraft-compatible builds. Called after the base catalog is loaded.
+  Future<List<MtnMinecraftGameLoaderVersion>> doGenerateMinecraftVersionList(String mcVersion, List<MtnMinecraftGameVersionType> types);
 
   List<MtnMinecraftGameLoaderVersion> _items = [];
   List<MtnMinecraftGameLoaderVersion> get items => UnmodifiableListView(_items);
@@ -128,7 +130,8 @@ class MtnMinecraftGameLoaderVersionList {
 
     _setError(MtnMinecraftError.none);
     try {
-      final loaded = await onGenerateMinecraftVersionList(this, mcVersion, types);
+      if (_items.isEmpty) await load();
+      final loaded = await doGenerateMinecraftVersionList(mcVersion, types);
       final result = loaded.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
       cacheFile.save(result);
       if (cacheFile.error != MtnMinecraftError.none) {
@@ -157,7 +160,7 @@ class MtnMinecraftGameLoaderVersionList {
 
     _setError(MtnMinecraftError.none);
     try {
-      _items = await onLoadFromWeb(this);
+      _items = await doLoadFromWeb();
       cacheFile.save(_items);
       if (cacheFile.error != MtnMinecraftError.none) {
         _setError(cacheFile.error, cacheFile.errorMessage ?? '');
