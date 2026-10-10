@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import '../mtn_minecraft_game_version_type.dart';
 import 'dart:convert';
 
@@ -61,8 +59,9 @@ class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVe
           channel: loaderChannel(version),
         ));
       }
-    } catch (error) {
-      stderr.writeln('Optional NeoForge 1.20.1 metadata unavailable: $error');
+    } catch (_) {
+      // Optional legacy metadata cannot invalidate successfully loaded modern builds.
+      // downloadUrl() already records network failures on the VersionList.
     }
     sortItems(result);
     return result;

@@ -56,6 +56,16 @@ class _NeoForgeFixture extends MtnMinecraftGameLoaderVersionListNeoForge {
   }
 }
 
+class _NeoForgeMissingLegacyFixture extends _NeoForgeFixture {
+  _NeoForgeMissingLegacyFixture({required super.cacheDirectory});
+
+  @override
+  Future<String> downloadUrl(String url) async {
+    if (url.contains('/forge/maven-metadata.xml')) throw const SocketException('optional legacy index unavailable');
+    return super.downloadUrl(url);
+  }
+}
+
 void main() {
   late Directory cache;
 
@@ -122,5 +132,12 @@ void main() {
     final legacy = await list.getFromMinecraftVersion('1.20.1');
     expect(legacy, hasLength(1));
     expect(legacy.single.version, '1.20.1-47.1.1');
+  });
+
+  test('missing optional NeoForge legacy index does not discard modern builds', () async {
+    final list = _NeoForgeMissingLegacyFixture(cacheDirectory: cache.path);
+    final builds = await list.getFromMinecraftVersion('1.21.11');
+    expect(builds, hasLength(2));
+    expect(builds.first.version, '21.11.45');
   });
 }
