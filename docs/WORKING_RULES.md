@@ -5,8 +5,8 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 ## Scope and ownership
 
 - Package: `minecraft_models`, an independent pure-Dart repository shared by `mtn_launcher` and `minecraft_loader_version_list`.
-- Only approved common value models, named records and enums belong here.
-- No Flutter, UI, HTTP, filesystems, network, caching, loader providers, installation, game-launch orchestration, version discovery, or version-selection services.
+- Common value models/enums and the approved generic `MtnMinecraftGameLoaderVersionList` index belong here.
+- The VersionList may perform shared HTTP metadata requests and best-effort JSON cache operations. Provider-specific wire parsing, artifact installation, UI and game-launch orchestration do not belong here.
 - Keep dependency direction one way: consumers depend on `minecraft_models`; models never import consumers.
 - Avoid speculative class hierarchies/frameworks and duplicating types already owned here.
 
@@ -27,7 +27,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
-- Sorting, latest/stable selection, compatibility queries, cache state, HTTP metadata and launcher orchestration are consumer responsibilities.
+- Providers own their newest-first source catalog and build ordering. VersionList preserves that order, filters Minecraft version/type, and performs best-effort metadata/cache access; exact/default loader choice and launcher orchestration belong to consumers.
 
 ## Naming and architecture
 

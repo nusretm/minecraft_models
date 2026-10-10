@@ -32,7 +32,7 @@ bu davranışlar ilgili uygulamalarda kalmalıdır.
 
 ## Kullanım
 
-Paketin tek public API giriş noktası kullanılır:
+Paketin tek public API giriş noktası kullanılır. `MtnMinecraftGameLoaderVersionList` provider callback'leriyle loader sürüm index'ini sunar; cache ve metadata ağına ilişkin hatalar ana uygulama akışını durdurmaz:
 
 ```dart
 import 'package:minecraft_models/minecraft_models.dart';
@@ -41,13 +41,12 @@ import 'package:minecraft_models/minecraft_models.dart';
 İlk foundation API'si Minecraft sürüm tipini, loader tarafından desteklenen
 Minecraft sürümü named record'unu, loader build channel enum'unu ve immutable
 loader build modelini içerir. Loader build modeli exact upstream version ve URL
-değerlerini değiştirmeden saklar. LVL-I3A kapsamında isteğe bağlı kaynak SHA-1
-metadata'sı da JSON üzerinden kayıpsız taşınır; dosya indirimi veya checksum
-doğrulaması bu saf value modelinin sorumluluğu değildir.
+değerlerini değiştirmeden saklar. Genel VersionList ise loader'a özel JSON formatlarını bilmeden
+callback sonuçlarını ve best-effort cache'i yönetir. Mevcut `MtnMinecraftGameLoaderVersion`
+modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılmaz.
 
 ## Proje durumu
 
-MOD-1 foundation modeli `main` branch'indedir. LVL-I3A kaynak SHA-1 metadata
-değişikliği Windows doğrulamasını ve testlerini geçmiştir; commit ve push tamamlanmış,
-PR #5 açıktır ve squash merge için ayrı onay beklenmektedir.
+MOD-1 foundation modelleri `main` branch'indedir. VersionList dayanıklılık düzeltmeleri
+ayrı bir feature branch'te incelenmektedir; Windows testleri ve merge onayı beklenmektedir.
 Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
