@@ -40,8 +40,9 @@ import 'package:minecraft_models/minecraft_models.dart';
 
 Güncel public API Minecraft sürüm tipi ve loader build channel enum'larını,
 immutable loader build modelini ve abstract `MtnMinecraftGameLoaderVersionList` ile beş provider sınıfını içerir. Loader build modeli exact upstream version ve URL
-değerlerini değiştirmeden saklar. Genel VersionList ise loader'a özel JSON formatlarını bilmeden
-callback sonuçlarını ve best-effort cache'i yönetir. Mevcut `MtnMinecraftGameLoaderVersion`
+değerlerini değiştirmeden saklar. Genel VersionList, provider override sonuçlarını
+ve best-effort cache'i yönetir. Loader'a özel JSON/XML parsing ise provider sınıflarındadır.
+Mevcut `MtnMinecraftGameLoaderVersion`
 modelinde SHA-1 alanı yoktur; kaynak doğrulama ve oyun kurulumu burada yapılmaz.
 
 ### Hata yönetimi
@@ -123,6 +124,7 @@ Maven metadata'nın sayısal sürüm sıralaması yayın tarihi garantisi vermez
 
 ## Proje durumu
 
-MOD-1 foundation modelleri `main` branch'indedir. VersionList dayanıklılık düzeltmeleri
-ayrı bir feature branch'te incelenmektedir; Windows testleri ve merge onayı beklenmektedir.
-Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
+VersionList, beş somut provider ve ortak loader enum'u için Windows doğrulaması
+başarılıdır (`dart analyze` temiz, `dart test` 40/40 geçti; Minecraft 1.21.11
+canlı katalog örneği beş loader için sonuç döndürdü). PR #6 merge ve cleanup
+onayı alınmıştır. Tüketici repository entegrasyonları ayrı checkpoint'lerdir.
