@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'mtn_minecraft_error.dart';
 import 'mtn_minecraft_game_loader_version.dart';
 import 'mtn_minecraft_game_version_type.dart';
 import 'mtn_minecraft_game_loader_version_list.dart';
@@ -18,6 +19,9 @@ class MtnMinecraftGameLoaderVersionListCache {
   List<MtnMinecraftGameVersionType>? types;
 
   /// Non-fatal filesystem diagnostic for this cache operation.
+  MtnMinecraftError _error = MtnMinecraftError.none;
+  MtnMinecraftError get error => _error;
+  int get errorCode => _error.code;
   String? errorMessage;
 
   String get filename {
@@ -36,6 +40,7 @@ class MtnMinecraftGameLoaderVersionListCache {
       final cacheFile = File(filename);
       return cacheFile.existsSync() && DateTime.now().difference(cacheFile.lastModifiedSync()) <= versionList.cacheDuration;
     } catch (error) {
+      _error = MtnMinecraftError.cacheMetadataFailed;
       errorMessage = 'Cache metadata error: $error';
       return false;
     }
@@ -46,6 +51,7 @@ class MtnMinecraftGameLoaderVersionListCache {
       final cacheFile = File(filename);
       if (cacheFile.existsSync()) cacheFile.deleteSync();
     } catch (error) {
+      _error = MtnMinecraftError.cacheDeleteFailed;
       errorMessage = 'Cache cleanup error: $error';
     }
   }
@@ -55,8 +61,10 @@ class MtnMinecraftGameLoaderVersionListCache {
       Directory(versionList.cacheDirectory).createSync(recursive: true);
       final jsonList = list.map((item) => item.toJson()).toList();
       File(filename).writeAsStringSync(jsonEncode(jsonList));
+      _error = MtnMinecraftError.none;
       errorMessage = null;
     } catch (error) {
+      _error = MtnMinecraftError.cacheWriteFailed;
       errorMessage = 'Cache write error: $error';
     }
   }
@@ -73,11 +81,15 @@ class MtnMinecraftGameLoaderVersionListCache {
       for (final item in raw) {
         result.add(MtnMinecraftGameLoaderVersion.fromJson(Map<String, Object?>.from(item as Map)));
       }
+      _error = MtnMinecraftError.none;
       errorMessage = null;
       return result;
     } catch (error) {
-      errorMessage = 'Cache read error: $error';
       clear();
+      if (_error != MtnMinecraftError.cacheDeleteFailed) {
+        _error = MtnMinecraftError.cacheReadFailed;
+        errorMessage = 'Cache read error: $error';
+      }
       return null;
     }
   }
