@@ -60,7 +60,11 @@ class MtnMinecraftGameLoaderVersionList {
         _setError(response.statusCode, 'HTTP ${response.statusCode}: $uri');
         throw HttpException(errorMessage, uri: uri);
       }
-      return utf8.decode(response.bodyBytes);
+      final result = utf8.decode(response.bodyBytes);
+      _setError(0, '');
+      return result;
+    } on HttpException {
+      rethrow;
     } on TimeoutException catch (error) {
       _setError(2, 'Request timed out: $uri ($error)');
       rethrow;
@@ -108,31 +112,48 @@ class MtnMinecraftGameLoaderVersionList {
     return suffix.startsWith('-') || suffix.startsWith('+') ? -1 : 1;
   }
 
+  /// Returns compatible builds without altering the provider's newest-first order.
   Future<List<MtnMinecraftGameLoaderVersion>> getFromMinecraftVersion(String mcVersion, [List<MtnMinecraftGameVersionType> types = const []]) async {
-    List<MtnMinecraftGameLoaderVersion> res = [];
-    var cacheFile = MtnMinecraftGameLoaderVersionListCache(versionList: this, mcVersion: mcVersion, types: types);
-    if(cacheFile.available) {
-      res = cacheFile.load() ?? [];
-    } else {
-      try {
-        res = await onGenerateMinecraftVersionList(this, mcVersion);
-        cacheFile.save(res);
-      } catch(_) {}
+    final cacheFile = MtnMinecraftGameLoaderVersionListCache(versionList: this, mcVersion: mcVersion, types: types);
+    final cached = cacheFile.load();
+    if (cached != null) {
+      _setError(0, '');
+      return cached.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
     }
-    return res;
+
+    _setError(0, '');
+    try {
+      final loaded = await onGenerateMinecraftVersionList(this, mcVersion);
+      final result = loaded.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
+      cacheFile.save(result);
+      if (cacheFile.errorMessage != null) _setError(-1, cacheFile.errorMessage!);
+      return result;
+    } catch (error) {
+      if (_errorCode == 0) _setError(-2, 'Loader version discovery failed: $error');
+      final stale = cacheFile.load(includeExpired: true);
+      if (stale != null) return stale.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
+      return [];
+    }
   }
 
+  /// Loads the complete provider index and retains usable data after refresh errors.
   Future<List<MtnMinecraftGameLoaderVersion>> load() async {
-    var cacheFile = MtnMinecraftGameLoaderVersionListCache(versionList: this);
-    if(cacheFile.available) {
-      if(_items.isEmpty) {
-        _items = cacheFile.load() ?? [];
-      }
-    } else {
-      try {
-        _items = await onLoadFromWeb(this);
-        cacheFile.save(_items);
-      } catch(_) {}
+    final cacheFile = MtnMinecraftGameLoaderVersionListCache(versionList: this);
+    final cached = cacheFile.load();
+    if (cached != null) {
+      _items = cached;
+      _setError(0, '');
+      return _items;
+    }
+
+    _setError(0, '');
+    try {
+      _items = await onLoadFromWeb(this);
+      cacheFile.save(_items);
+      if (cacheFile.errorMessage != null) _setError(-1, cacheFile.errorMessage!);
+    } catch (error) {
+      if (_errorCode == 0) _setError(-2, 'Loader catalog refresh failed: $error');
+      if (_items.isEmpty) _items = cacheFile.load(includeExpired: true) ?? _items;
     }
     return _items;
   }
