@@ -4,6 +4,25 @@ import 'dart:io';
 import 'package:minecraft_models/minecraft_models.dart';
 import 'package:test/test.dart';
 
+/// Test-only subclass exercises the shared lifecycle without a real provider.
+class _TestVersionList extends MtnMinecraftGameLoaderVersionList {
+  _TestVersionList({
+    required super.cacheDirectory,
+    required super.loaderName,
+    required this.onLoadFromWeb,
+    required this.onGenerateMinecraftVersionList,
+  });
+
+  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list) onLoadFromWeb;
+  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list, String mcVersion, List<MtnMinecraftGameVersionType> types) onGenerateMinecraftVersionList;
+
+  @override
+  Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb() => onLoadFromWeb(this);
+
+  @override
+  Future<List<MtnMinecraftGameLoaderVersion>> doGenerateMinecraftVersionList(String mcVersion, List<MtnMinecraftGameVersionType> types) => onGenerateMinecraftVersionList(this, mcVersion, types);
+}
+
 void main() {
   late Directory root;
 
@@ -30,7 +49,7 @@ void main() {
 
   test('creates cache folder and reuses valid data without a second request', () async {
     var calls = 0;
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async { calls++; return [release]; },
@@ -50,7 +69,7 @@ void main() {
     final cache = Directory('${root.path}/cache')..createSync();
     File('${cache.path}/vanilla.json').writeAsStringSync('{invalid JSON');
     var calls = 0;
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: cache.path,
       loaderName: 'vanilla',
       onLoadFromWeb: (_) async { calls++; return [release]; },
@@ -68,7 +87,7 @@ void main() {
     final cache = Directory('${root.path}/cache')..createSync();
     final cached = File('${cache.path}/forge.json')..writeAsStringSync(jsonEncode([release.toJson()]));
     cached.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 2)));
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: cache.path,
       loaderName: 'forge',
       onLoadFromWeb: (_) async => throw StateError('Offline'),
@@ -84,7 +103,7 @@ void main() {
 
   test('filters downloaded and cached builds while preserving provider order', () async {
     var calls = 0;
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async => [release, snapshot],
@@ -99,7 +118,7 @@ void main() {
 
   test('unwritable cache does not discard successful provider results', () async {
     final parentFile = File('${root.path}/not-a-directory')..writeAsStringSync('occupied');
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: parentFile.path,
       loaderName: 'quilt',
       onLoadFromWeb: (_) async => [release],
@@ -114,7 +133,7 @@ void main() {
   });
 
   test('cache filenames do not interpret Minecraft IDs as path separators', () async {
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async => [],
@@ -132,7 +151,7 @@ void main() {
       request.response.write('test');
       await request.response.close();
     });
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: root.path,
       loaderName: 'vanilla',
       onLoadFromWeb: (_) async => [],
@@ -157,7 +176,7 @@ void main() {
     final cache = Directory('${root.path}/cache')..createSync();
     final file = File('${cache.path}/forge-1.21.11-release.json')..writeAsStringSync(jsonEncode([release.toJson(), snapshot.toJson()]));
     file.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 2)));
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: cache.path,
       loaderName: 'forge',
       onLoadFromWeb: (_) async => [],
@@ -171,7 +190,7 @@ void main() {
   });
   test('forwards requested Minecraft version types to the provider', () async {
     List<MtnMinecraftGameVersionType>? seenTypes;
-    final list = MtnMinecraftGameLoaderVersionList(
+    final list = _TestVersionList(
       cacheDirectory: '${root.path}/cache',
       loaderName: 'type-filter',
       onLoadFromWeb: (_) async => [],
