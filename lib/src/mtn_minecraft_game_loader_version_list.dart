@@ -23,7 +23,7 @@ class MtnMinecraftGameLoaderVersionList {
   final String cacheDirectory;
   final String loaderName;
   final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list) onLoadFromWeb;
-  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list, String mcVersion) onGenerateMinecraftVersionList;
+  final Future<List<MtnMinecraftGameLoaderVersion>> Function(MtnMinecraftGameLoaderVersionList list, String mcVersion, List<MtnMinecraftGameVersionType> types) onGenerateMinecraftVersionList;
   final Duration cacheDuration;
 
   List<MtnMinecraftGameLoaderVersion> _items = [];
@@ -128,7 +128,7 @@ class MtnMinecraftGameLoaderVersionList {
 
     _setError(MtnMinecraftError.none);
     try {
-      final loaded = await onGenerateMinecraftVersionList(this, mcVersion);
+      final loaded = await onGenerateMinecraftVersionList(this, mcVersion, types);
       final result = loaded.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
       cacheFile.save(result);
       if (cacheFile.error != MtnMinecraftError.none) {

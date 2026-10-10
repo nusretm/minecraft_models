@@ -34,7 +34,7 @@ void main() {
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async { calls++; return [release]; },
-      onGenerateMinecraftVersionList: (_, __) async => [release],
+      onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
 
     expect(await list.load(), [release]);
@@ -54,7 +54,7 @@ void main() {
       cacheDirectory: cache.path,
       loaderName: 'vanilla',
       onLoadFromWeb: (_) async { calls++; return [release]; },
-      onGenerateMinecraftVersionList: (_, __) async => [release],
+      onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
 
     expect(await list.load(), [release]);
@@ -72,7 +72,7 @@ void main() {
       cacheDirectory: cache.path,
       loaderName: 'forge',
       onLoadFromWeb: (_) async => throw StateError('Offline'),
-      onGenerateMinecraftVersionList: (_, __) async => throw StateError('Offline'),
+      onGenerateMinecraftVersionList: (_, __, ___) async => throw StateError('Offline'),
     );
 
     expect(await list.load(), [release]);
@@ -88,7 +88,7 @@ void main() {
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async => [release, snapshot],
-      onGenerateMinecraftVersionList: (_, __) async { calls++; return [snapshot, release]; },
+      onGenerateMinecraftVersionList: (_, __, ___) async { calls++; return [snapshot, release]; },
     );
 
     expect(await list.getFromMinecraftVersion('1.21.11', [MtnMinecraftGameVersionType.release]), [release]);
@@ -103,7 +103,7 @@ void main() {
       cacheDirectory: parentFile.path,
       loaderName: 'quilt',
       onLoadFromWeb: (_) async => [release],
-      onGenerateMinecraftVersionList: (_, __) async => [release],
+      onGenerateMinecraftVersionList: (_, __, ___) async => [release],
     );
 
     expect(await list.load(), [release]);
@@ -118,7 +118,7 @@ void main() {
       cacheDirectory: '${root.path}/cache',
       loaderName: 'fabric',
       onLoadFromWeb: (_) async => [],
-      onGenerateMinecraftVersionList: (_, __) async => [],
+      onGenerateMinecraftVersionList: (_, __, ___) async => [],
     );
 
     expect(await list.getFromMinecraftVersion('../custom'), isEmpty);
@@ -136,7 +136,7 @@ void main() {
       cacheDirectory: root.path,
       loaderName: 'vanilla',
       onLoadFromWeb: (_) async => [],
-      onGenerateMinecraftVersionList: (_, __) async => [],
+      onGenerateMinecraftVersionList: (_, __, ___) async => [],
     );
 
     try {
@@ -161,12 +161,29 @@ void main() {
       cacheDirectory: cache.path,
       loaderName: 'forge',
       onLoadFromWeb: (_) async => [],
-      onGenerateMinecraftVersionList: (_, __) async => throw StateError('Metadata unavailable'),
+      onGenerateMinecraftVersionList: (_, __, ___) async => throw StateError('Metadata unavailable'),
     );
 
     expect(await list.getFromMinecraftVersion('1.21.11', [MtnMinecraftGameVersionType.release]), [release]);
     expect(list.error, MtnMinecraftError.downloadFailed);
     expect(list.errorCode, MtnMinecraftError.downloadFailed.code);
     expect(MtnMinecraftError.isDownloadError(list.error), isTrue);
+  });
+  test('forwards requested Minecraft version types to the provider', () async {
+    List<MtnMinecraftGameVersionType>? seenTypes;
+    final list = MtnMinecraftGameLoaderVersionList(
+      cacheDirectory: '${root.path}/cache',
+      loaderName: 'type-filter',
+      onLoadFromWeb: (_) async => [],
+      onGenerateMinecraftVersionList: (_, game, types) async {
+        expect(game, '1.21.11');
+        seenTypes = types;
+        return [release, snapshot];
+      },
+    );
+
+    final result = await list.getFromMinecraftVersion('1.21.11', [MtnMinecraftGameVersionType.release]);
+    expect(seenTypes, [MtnMinecraftGameVersionType.release]);
+    expect(result, [release]);
   });
 }
