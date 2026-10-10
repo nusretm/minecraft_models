@@ -6,24 +6,13 @@ Future<void> main(List<String> args) async {
   final mcVersion = args.isEmpty ? '1.21.11' : args.first;
   final cacheDirectory = '${Directory.systemTemp.path}${Platform.pathSeparator}mtn_minecraft_game_loader_version_lists';
 
-  var versionListVanilla = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.vanilla);
-  var versionListFabric = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.fabric);
-  var versionListQuilt = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.quilt);
-  var versionListForge = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.forge);
-  var versionListNeoForge = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: MtnMinecraftLoaderType.neoforge);
-
-  for (final (label, versionList) in <(String, MtnMinecraftGameLoaderVersionList)>[
-    ('Vanilla', versionListVanilla),
-    ('Fabric', versionListFabric),
-    ('Quilt', versionListQuilt),
-    ('Forge', versionListForge),
-    ('NeoForge', versionListNeoForge),
-  ]) {
+  for (final loaderType in MtnMinecraftLoaderType.values) {
+    final versionList = MtnMinecraftGameLoaderVersionList(cacheDirectory: cacheDirectory, loaderType: loaderType);
     final catalog = await versionList.load();
     final catalogError = versionList.error;
     final catalogErrorMessage = versionList.errorMessage;
     final versions = await versionList.getFromMinecraftVersion(mcVersion);
-    stdout.writeln('\n$label — catalog: ${catalog.length} entries | Minecraft: $mcVersion | builds: ${versions.length}');
+    stdout.writeln('\n${loaderType.name} — catalog: ${catalog.length} entries | Minecraft: $mcVersion | builds: ${versions.length}');
     if (catalogError != MtnMinecraftError.none) stdout.writeln('  Catalog warning [${catalogError.code}]: $catalogErrorMessage');
     if (versionList.error != MtnMinecraftError.none) stdout.writeln('  Build warning [${versionList.errorCode}]: ${versionList.errorMessage}');
     if (versions.isEmpty) {
