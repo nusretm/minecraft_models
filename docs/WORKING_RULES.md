@@ -52,3 +52,17 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 3. Migrate `minecraft_tools/minecraft_loader_version_list` without duplicate types.
 4. Integrate `mtn_launcher` in a separate approved checkpoint.
 5. Keep Forge V1-B2 legacy libraries and V1-B3 launcher execution changes independently gated.
+
+
+---
+
+## Shared engineering refinements (2026-10)
+
+The existing project rules and continuity decisions remain authoritative. Apply these refinements to **new code**; do not mass-rename or restructure working implementations without a separate approved checkpoint.
+
+- **Naming and class families:** Abstract classes end in `Abs`; concrete reusable base classes end in `Base`. Concrete specializations retain the conceptual family prefix and append the specialization. Related enums and types retain the prefix (`ClassPageType`, `ClassPageContentHome`). Do not invent inheritance layers merely to satisfy the naming scheme. Respect Rust and framework idioms.
+- **Shared logic:** Move semantically shared behavior from sibling implementations to the lowest appropriate common ancestor. Keep specialized behavior at its owner. Avoid sprawling private helpers, forwarding layers, and duplicate conditionals; use composition where inheritance would be artificial.
+- **API, state, errors:** Design explicit public contracts and meaningful parameters; identify owners of mutable state and lifecycle. Define relevant invariants, retries, cancellation, cleanup, error/recovery semantics, and resource ownership. Do not suppress failures.
+- **Layout:** Use subsystem/domain-first grouping within each language. Multi-language repositories may use root `docs/`, `rust/`, `dart/`, `ui/`, `scripts/`, and generated `build/` when applicable. Do not restructure existing repositories solely to match a template.
+- **Build and FFI:** Ignore generated root `build/`. Maintain one authoritative published artifact location and avoid manual binary copies or stale FFI loading; define ABI and memory ownership when relevant.
+- **Dependencies and review:** Request approval for new dependencies; preserve project-specific `.gitignore` rules, tracked sources and necessary lockfiles. Review actual diffs for architecture and behavior independently of tests; report synthetic and live validation separately.
