@@ -1,6 +1,6 @@
 # Minecraft Models — Working Rules
 
-This document is the authoritative development standard for `nusretm/minecraft_models`. Read this file, `docs/continuity/CURRENT_TARGET.md`, and the active model design before any development.
+This document is the authoritative development standard for `nusretm/minecraft_models`. Read this file, the **current** `docs/continuity/CURRENT_TARGET.md`, and `docs/continuity/CONSUMER_INTEGRATION.md` before any development or consumer migration. Historical foundation plans or archived continuity are not current API specifications.
 
 ## Scope and ownership
 
@@ -28,7 +28,7 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
-- Concrete providers own source discovery and build ordering; the base VersionList preserves their order, filters Minecraft version/type, and performs best-effort metadata/cache access. Consumer launch and exact/default loader selection remain outside this package.
+- Internal provider helpers own source discovery and provider-specific ordering; the **single public constructible VersionList** preserves returned order, filters Minecraft version/type, and performs best-effort metadata/cache access. Consumer launch and exact/default loader selection remain outside this package.
 - VersionList's public constructor accepts `loaderType: MtnMinecraftLoaderType`. It selects one internal provider helper; the helpers override `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)` and never own separate HTTP/cache/error state. Neither `MtnMinecraftGameLoaderVersionListHelper` nor the five provider subclasses are barrel exports. Keep provider parsing inside provider files, with small shared pure parsing helpers where genuinely needed.
 - Cache file identity uses `loaderType.name`, preserving the previous Vanilla/Fabric/Forge/NeoForge/Quilt cache filenames. Do not add a `loaderName` compatibility field before the first release.
 - Use `MtnMinecraftError` for cache (1000-range) and download (2000-range) failures. Successful operations use `none(0)`. Expose the typed error plus its numeric code/message; use `VersionList._setError(MtnMinecraftError, [message])` for updates, and include HTTP status details in the message without a separate HTTP status field. Non-fatal failures must not prevent using available catalog data.
@@ -47,15 +47,14 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - Library .gitignore excludes `.dart_tool/`, `build/`, `pubspec.lock`; do not commit generated files or unrelated logs.
 - Do not claim tests passed without actual local/Windows or runner evidence.
 - Do not generate patch files in place of GitHub commits/PRs.
-- Consumers should depend on a fixed approved Git commit/tag, not a drifting `main` ref.
+- Consumers should depend on a fixed approved Git commit/tag, not a drifting `main` ref. Validated PR #7 implementation baseline: `1c4e346ed42bf9f15b0259c8efb2f7d3011758a3`. Follow `docs/continuity/CONSUMER_INTEGRATION.md`; never add duplicate canonical enums or import the internal `src/` helper classes.
 
-## Integration order
+## Integration status and next gates
 
-1. Approve and implement the four foundation models here.
-2. Validate on Windows, record a fixed commit/tag, separately approve merge.
-3. Review `minecraft_tools/minecraft_loader_version_list` migration independently; avoid duplicate canonical model identity or competing generic VersionList ownership.
-4. Integrate `mtn_launcher` in a separate approved checkpoint.
-5. Keep Forge V1-B2 legacy libraries and V1-B3 launcher execution changes independently gated.
+- Shared models and the single public VersionList/helper architecture were implemented, **merged (PR #7)** and Windows validated (40 tests passed and two Minecraft versions checked live on all five loaders).
+- `minecraft_tools/minecraft_loader_version_list` migration is **not yet performed** in this repository. Review consumer definitions and APIs in a separate approved checkpoint; prevent competing canonical type identity.
+- `mtn_launcher` integration is **not yet performed** in this repository. Pin the validated package SHA; preserve its launcher-specific download manager, task orchestration, artifact verification and execution responsibilities.
+- Further Forge installer, trust/source acquisition and runtime execution changes are **independent checkpoints**, requiring their own design, tests and merge approvals.
 
 
 ---

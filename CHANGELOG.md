@@ -1,3 +1,8 @@
+## Unreleased — Documentation / consumer integration handoff (2026-10-10)
+- Close PR #7 continuity with the actual merge SHA `1c4e346`, successful post-merge Windows `dart analyze`, 40 passing tests, live Vanilla/Fabric/Forge/NeoForge/Quilt metadata results on 1.21.11 and 1.21.1, and completed feature-branch cleanup.
+- Publish `docs/continuity/CONSUMER_INTEGRATION.md` explaining the single public VersionList API, typed loader identity, pinned Git dependency, provider URL differences, cache/error contracts and separate MtnLauncher/Minecraft Tools migrations.
+- Move stale in-progress checkpoint notes to a labeled historical archive; refresh README and working rules to keep consumers on the current API. Documentation-only: no Dart source/behavior changes.
+
 ## Unreleased — Internal loader helpers and single public VersionList
 - Make `MtnMinecraftGameLoaderVersionList` constructible: callers provide `cacheDirectory` and `loaderType`.
 - Add internal abstract `MtnMinecraftGameLoaderVersionListHelper` with `versionList` ownership reference and two provider override hooks.
