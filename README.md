@@ -54,6 +54,31 @@ HTTP yanıt kodu gerekiyorsa `errorMessage` içinden okunabilir. Başarılı iş
 `MtnMinecraftError.none` durumuna döner. Cache ve indirme sorunları kullanılabilir
 liste verisini otomatik olarak geçersiz kılmaz.
 
+### Yerleşik VersionList provider sınıfları
+
+Bu pakette `MtnMinecraftGameLoaderVersionList` ortak abstract temel sınıftır.
+Provider'a özel JSON/XML ayrıştırma, endpoint'ler ve sürüm eşleştirme
+`lib/src/loaders/` altında Vanilla, Fabric, Quilt, Forge ve NeoForge
+sınıflarındadır. Uygulamalar callback, `loaderName` veya parser tanımlamaz:
+
+```dart
+final cacheDirectory = Directory.systemTemp.path;
+
+var versionListVanilla = MtnMinecraftGameLoaderVersionListVanilla(cacheDirectory: cacheDirectory);
+var versionListFabric = MtnMinecraftGameLoaderVersionListFabric(cacheDirectory: cacheDirectory);
+var versionListQuilt = MtnMinecraftGameLoaderVersionListQuilt(cacheDirectory: cacheDirectory);
+var versionListForge = MtnMinecraftGameLoaderVersionListForge(cacheDirectory: cacheDirectory);
+var versionListNeoForge = MtnMinecraftGameLoaderVersionListNeoForge(cacheDirectory: cacheDirectory);
+
+final versions = await versionListFabric.getFromMinecraftVersion('1.21.11');
+```
+
+İlgili çağrı gerekiyorsa önce genel katalogu yükler. Her provider `doLoadFromWeb()`
+ve `doGenerateMinecraftVersionList(mcVersion, types)` metodlarını override eder;
+bunlar artık public constructor callback parametresi değildir.
+`MtnMinecraftGameLoaderVersion.fromRawData()` eklenmedi. Ham veri yorumlama
+ve loader'a özgü dönüşüm provider sorumluluğudur.
+
 ### Beş provider'lı gerçek metadata örneği
 
 ```powershell

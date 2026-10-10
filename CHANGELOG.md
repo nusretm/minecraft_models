@@ -1,3 +1,11 @@
+## Unreleased — Concrete Minecraft loader VersionList providers
+- Convert the existing `MtnMinecraftGameLoaderVersionList` into the abstract shared cache/HTTP lifecycle base without renaming it.
+- Replace public loading callbacks with provider overrides `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`.
+- Add built-in Vanilla, Fabric, Quilt, Forge and NeoForge VersionList subclasses under `lib/src/loaders/`; constructors accept `cacheDirectory` and fix their own `loaderName`.
+- Move upstream wire-format parsing out of the example; keep `MtnMinecraftGameLoaderVersion` as a value model, without adding `fromRawData()`.
+- Ensure direct version lookup initializes the catalog and does not cache a false empty list after catalog failure.
+- Add fixture-backed offline provider tests and retain the validated best-effort cache / typed-error contracts.
+
 ## Unreleased — Five-loader upstream metadata example
 - Add a single `main()` creating Vanilla, Fabric, Quilt, Forge and NeoForge `MtnMinecraftGameLoaderVersionList` instances using their published metadata endpoints.
 - Forward `types` into the provider's `onGenerateMinecraftVersionList(list, mcVersion, types)` callback.

@@ -5,8 +5,8 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 ## Scope and ownership
 
 - Package: `minecraft_models`, an independent pure-Dart repository shared by `mtn_launcher` and `minecraft_loader_version_list`.
-- Common value models/enums and the approved generic `MtnMinecraftGameLoaderVersionList` index belong here.
-- The VersionList may perform shared HTTP metadata requests and best-effort JSON cache operations. Provider-specific wire parsing, artifact installation, UI and game-launch orchestration do not belong here.
+- Common value models/enums, the abstract `MtnMinecraftGameLoaderVersionList` base, and its five concrete provider classes belong here.
+- The abstract VersionList owns shared HTTP metadata requests, best-effort JSON cache and error handling. Vanilla, Fabric, Quilt, Forge and NeoForge subclasses own their endpoint URLs and provider-specific wire parsing. Artifact installation, UI and game-launch orchestration remain outside this package.
 - Keep dependency direction one way: consumers depend on `minecraft_models`; models never import consumers.
 - Avoid speculative class hierarchies/frameworks and duplicating types already owned here.
 
@@ -27,7 +27,8 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
-- Providers own their newest-first source catalog and build ordering. VersionList preserves that order, filters Minecraft version/type, and performs best-effort metadata/cache access; exact/default loader choice and launcher orchestration belong to consumers.
+- Concrete providers own source discovery and build ordering; the base VersionList preserves their order, filters Minecraft version/type, and performs best-effort metadata/cache access. Consumer launch and exact/default loader selection remain outside this package.
+- The base constructor fixes `loaderName` through each concrete subclass; `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)` are provider overrides, not public constructor callbacks. Keep provider parsing inside the provider files, with small shared pure parsing helpers where genuinely needed.
 - Use `MtnMinecraftError` for cache (1000-range) and download (2000-range) failures. Successful operations use `none(0)`. Expose the typed error plus its numeric code/message; use `VersionList._setError(MtnMinecraftError, [message])` for updates, and include HTTP status details in the message without a separate HTTP status field. Non-fatal failures must not prevent using available catalog data.
 
 ## Naming and architecture
