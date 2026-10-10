@@ -1,19 +1,18 @@
 import '../mtn_minecraft_game_version_type.dart';
-import '../mtn_minecraft_loader_type.dart';
 
 import '../mtn_minecraft_game_loader_version.dart';
-import '../mtn_minecraft_game_loader_version_list.dart';
+import '../mtn_minecraft_game_loader_version_list_helper.dart';
 import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// Forge Maven metadata. Version URLs are installer JAR candidates, not JSON.
-class MtnMinecraftGameLoaderVersionListForge extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.forge);
+class MtnMinecraftGameLoaderVersionListForge extends MtnMinecraftGameLoaderVersionListHelper {
+  MtnMinecraftGameLoaderVersionListForge(super.versionList);
 
   static const String mavenBase = 'https://maven.minecraftforge.net/net/minecraftforge/forge';
 
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb() async {
-    final versions = mavenVersions(await downloadUrl('$mavenBase/maven-metadata.xml'));
+    final versions = mavenVersions(await versionList.downloadUrl('$mavenBase/maven-metadata.xml'));
     final result = <MtnMinecraftGameLoaderVersion>[];
     for (final version in versions) {
       final match = RegExp(r'^(\d+(?:\.\d+){1,2})-').firstMatch(version);
@@ -28,12 +27,12 @@ class MtnMinecraftGameLoaderVersionListForge extends MtnMinecraftGameLoaderVersi
         channel: loaderChannel(version),
       ));
     }
-    sortItems(result);
+    versionList.sortItems(result);
     return result;
   }
 
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doGenerateMinecraftVersionList(String mcVersion, List<MtnMinecraftGameVersionType> types) async {
-    return items.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
+    return versionList.items.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
   }
 }

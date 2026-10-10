@@ -10,9 +10,15 @@ import 'mtn_minecraft_game_loader_version.dart';
 import 'mtn_minecraft_game_loader_version_list_cache.dart';
 import 'mtn_minecraft_game_version_type.dart';
 import 'mtn_minecraft_loader_type.dart';
+import 'mtn_minecraft_game_loader_version_list_helper.dart';
+import 'loaders/mtn_minecraft_game_loader_version_list_vanilla.dart';
+import 'loaders/mtn_minecraft_game_loader_version_list_fabric.dart';
+import 'loaders/mtn_minecraft_game_loader_version_list_forge.dart';
+import 'loaders/mtn_minecraft_game_loader_version_list_neoforge.dart';
+import 'loaders/mtn_minecraft_game_loader_version_list_quilt.dart';
 
-/// Shared cache, HTTP, and lifecycle. Loader-specific parsing belongs to subclasses.
-abstract class MtnMinecraftGameLoaderVersionList {
+/// Public Minecraft loader catalog. Provider interpretation is delegated to an internal helper.
+class MtnMinecraftGameLoaderVersionList {
   MtnMinecraftGameLoaderVersionList({
     required this.cacheDirectory,
     required this.loaderType,
@@ -23,11 +29,14 @@ abstract class MtnMinecraftGameLoaderVersionList {
   final MtnMinecraftLoaderType loaderType;
   final Duration cacheDuration;
 
-  /// Loads the upstream catalog; the base class owns caching and error recovery.
-  Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb();
-
-  /// Discovers Minecraft-compatible builds. Called after the base catalog is loaded.
-  Future<List<MtnMinecraftGameLoaderVersion>> doGenerateMinecraftVersionList(String mcVersion, List<MtnMinecraftGameVersionType> types);
+  // One provider helper per VersionList instance; created only when first needed.
+  late final MtnMinecraftGameLoaderVersionListHelper _helper = switch (loaderType) {
+    MtnMinecraftLoaderType.vanilla => MtnMinecraftGameLoaderVersionListVanilla(this),
+    MtnMinecraftLoaderType.fabric => MtnMinecraftGameLoaderVersionListFabric(this),
+    MtnMinecraftLoaderType.forge => MtnMinecraftGameLoaderVersionListForge(this),
+    MtnMinecraftLoaderType.neoforge => MtnMinecraftGameLoaderVersionListNeoForge(this),
+    MtnMinecraftLoaderType.quilt => MtnMinecraftGameLoaderVersionListQuilt(this),
+  };
 
   List<MtnMinecraftGameLoaderVersion> _items = [];
   List<MtnMinecraftGameLoaderVersion> get items => UnmodifiableListView(_items);
@@ -134,7 +143,7 @@ abstract class MtnMinecraftGameLoaderVersionList {
       if (_items.isEmpty) await load();
       final catalogError = _error;
       final catalogErrorMessage = _errorMessage;
-      final loaded = await doGenerateMinecraftVersionList(mcVersion, types);
+      final loaded = await _helper.doGenerateMinecraftVersionList(mcVersion, types);
       // A failed catalog refresh is not a legitimate empty version list.
       // Keep it retryable instead of persisting a misleading empty cache file.
       if (_items.isEmpty && catalogError != MtnMinecraftError.none && loaded.isEmpty) {
@@ -169,7 +178,7 @@ abstract class MtnMinecraftGameLoaderVersionList {
 
     _setError(MtnMinecraftError.none);
     try {
-      _items = await doLoadFromWeb();
+      _items = await _helper.doLoadFromWeb();
       cacheFile.save(_items);
       if (cacheFile.error != MtnMinecraftError.none) {
         _setError(cacheFile.error, cacheFile.errorMessage ?? '');

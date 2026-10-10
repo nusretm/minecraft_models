@@ -1,13 +1,12 @@
 import '../mtn_minecraft_game_version_type.dart';
-import '../mtn_minecraft_loader_type.dart';
 
 import '../mtn_minecraft_game_loader_version.dart';
-import '../mtn_minecraft_game_loader_version_list.dart';
+import '../mtn_minecraft_game_loader_version_list_helper.dart';
 import 'src/mtn_minecraft_game_loader_version_parsing.dart';
 
 /// NeoForge Maven metadata, including the optional historical 1.20.1 coordinate.
-class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVersionList {
-  MtnMinecraftGameLoaderVersionListNeoForge({required super.cacheDirectory, super.cacheDuration}) : super(loaderType: MtnMinecraftLoaderType.neoforge);
+class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVersionListHelper {
+  MtnMinecraftGameLoaderVersionListNeoForge(super.versionList);
 
   static const String mavenBase = 'https://maven.neoforged.net/releases/net/neoforged/neoforge';
   static const String legacyMavenBase = 'https://maven.neoforged.net/releases/net/neoforged/forge';
@@ -31,7 +30,7 @@ class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVe
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doLoadFromWeb() async {
     final result = <MtnMinecraftGameLoaderVersion>[];
-    final modern = mavenVersions(await downloadUrl('$mavenBase/maven-metadata.xml'));
+    final modern = mavenVersions(await versionList.downloadUrl('$mavenBase/maven-metadata.xml'));
     for (final version in modern) {
       final game = minecraftVersionFromBuild(version);
       if (game == null) continue;
@@ -47,7 +46,7 @@ class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVe
 
     // Failure of optional legacy metadata must not discard the modern catalog.
     try {
-      final legacy = mavenVersions(await downloadUrl('$legacyMavenBase/maven-metadata.xml'));
+      final legacy = mavenVersions(await versionList.downloadUrl('$legacyMavenBase/maven-metadata.xml'));
       for (final version in legacy) {
         if (!version.startsWith('1.20.1-')) continue;
         final escaped = Uri.encodeComponent(version);
@@ -63,12 +62,12 @@ class MtnMinecraftGameLoaderVersionListNeoForge extends MtnMinecraftGameLoaderVe
       // Optional legacy metadata cannot invalidate successfully loaded modern builds.
       // downloadUrl() already records network failures on the VersionList.
     }
-    sortItems(result);
+    versionList.sortItems(result);
     return result;
   }
 
   @override
   Future<List<MtnMinecraftGameLoaderVersion>> doGenerateMinecraftVersionList(String mcVersion, List<MtnMinecraftGameVersionType> types) async {
-    return items.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
+    return versionList.items.where((item) => item.mcVersion == mcVersion && (types.isEmpty || types.contains(item.type))).toList();
   }
 }
