@@ -1,3 +1,9 @@
+## Unreleased — Canonical Minecraft loader type
+- Export `MtnMinecraftLoaderType` (vanilla, fabric, forge, neoforge, quilt) from `minecraft_models.dart` for shared launcher use.
+- Add a case-insensitive, whitespace-tolerant `fromName(String?)`; unknown values return null, not Vanilla.
+- Replace public `VersionList.loaderName` with typed `loaderType` in the base and all five providers; cache filenames continue using `loaderType.name`.
+- Update tests for enum round-tripping, safe unknown names, typed provider identities, and existing cache behavior.
+
 ## Unreleased — Concrete Minecraft loader VersionList providers
 - Convert the existing `MtnMinecraftGameLoaderVersionList` into the abstract shared cache/HTTP lifecycle base without renaming it.
 - Replace public loading callbacks with provider overrides `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`.

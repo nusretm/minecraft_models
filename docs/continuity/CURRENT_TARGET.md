@@ -4,13 +4,21 @@ Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Dart package: `minecraft_models`
 Feature baseline `main` HEAD: `f7649860787f261460e3495bb174e4902aa51f1d`
-Active checkpoint: **Concrete provider VersionList architecture, [draft PR #6](https://github.com/nusretm/minecraft_models/pull/6) — post-refactor Windows validation pending, merge not approved**
+Active checkpoint: **Canonical loader enum + concrete provider VersionList architecture, [draft PR #6](https://github.com/nusretm/minecraft_models/pull/6) — post-refactor Windows validation pending, merge not approved**
 Historical MOD-1 foundation baseline: `a4139746927902770c8f09eeeba41e3d02216c98` (subsequently merged)
+
+## Canonical loader identity — MtnMinecraftLoaderType (2026-10-10)
+
+- Canonical type: `lib/src/mtn_minecraft_loader_type.dart`, exported through `lib/minecraft_models.dart` for both this package and later `MtnLauncher` consumption. Values are `vanilla`, `fabric`, `forge`, `neoforge`, `quilt`.
+- Public base field/constructor rename: `loaderName: String` → `loaderType: MtnMinecraftLoaderType`. Provider constructors fix their enum values; consumers still pass only `cacheDirectory` and optional `cacheDuration`.
+- `MtnMinecraftLoaderType.fromName(String?)` is case-insensitive and trims whitespace; unsupported names return null without throwing or silently choosing Vanilla. `.name` is the built-in canonical string form.
+- The cache key derives from `loaderType.name`; previous provider filenames remain unchanged. No backwards-compatibility property or separate launcher enum is added in this repository.
+- Added tests for all five enum values, safe name conversion and provider type identities. Windows analyzer, test suite and live provider smoke **must be rerun after this change**; no merge approval yet.
 
 ## Concrete VersionList providers — approved implementation (2026-10-10)
 
 - User explicitly approved implementing the provider architecture. The same `MtnMinecraftGameLoaderVersionList` name is kept as an abstract common base; it owns caching, HTTP, diagnostics and lifecycle.
-- Remove public `onLoadFromWeb` and `onGenerateMinecraftVersionList` constructor callbacks. Concrete subclasses override `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`. Each fixes its own `loaderName` in the superclass initializer; consumers only pass `cacheDirectory` (optional cache duration).
+- Remove public `onLoadFromWeb` and `onGenerateMinecraftVersionList` constructor callbacks. Concrete subclasses override `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)`. Each fixes its own `loaderType` enum value in the superclass initializer; consumers only pass `cacheDirectory` (optional cache duration).
 - Provider sources: `lib/src/loaders/mtn_minecraft_game_loader_version_list_vanilla.dart`, `..._fabric.dart`, `..._quilt.dart`, `..._forge.dart`, `..._neoforge.dart`. All five exported via `minecraft_models.dart`.
 - The generic value model `MtnMinecraftGameLoaderVersion` remains unchanged: `fromRawData()` is explicitly canceled. Provider-specific mappings (including NeoForge) are owned by each provider; small reusable parsing rules live in `loaders/src/`.
 - `getFromMinecraftVersion()` can initialize the general catalog if needed. It must not persist an empty per-game cache after a catalog failure. Preserve valid stale cache fallback, enum-based errors and provider order.

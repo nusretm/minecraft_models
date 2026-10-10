@@ -24,11 +24,13 @@ This document is the authoritative development standard for `nusretm/minecraft_m
 - One semantic type has one implementation. Consumers import or re-export the same Dart type; do not add conversion wrappers for copied enums.
 - `MtnMinecraftGameVersionType` describes Minecraft game version type.
 - `MtnMinecraftGameLoaderChannel` describes loader-build publication channel; an unknown channel is not automatically stable.
+- `MtnMinecraftLoaderType` is the canonical, exported Minecraft loader identity shared with the launcher (vanilla, fabric, forge, neoforge, quilt). Avoid duplicate enum definitions or alias strings in consumers. `fromName` trims and ignores case; unknown inputs return null instead of implicitly selecting Vanilla.
 - Preserve exact upstream IDs and source URLs without case normalization, truncation or reconstruction.
 - Models should be immutable, small and explicit about nullability/default values. Use deterministic and validated JSON for data that must serialize.
 - Model-only code cannot assume that a source URL is an installer JAR; URL interpretation belongs to the provider.
 - Concrete providers own source discovery and build ordering; the base VersionList preserves their order, filters Minecraft version/type, and performs best-effort metadata/cache access. Consumer launch and exact/default loader selection remain outside this package.
-- The base constructor fixes `loaderName` through each concrete subclass; `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)` are provider overrides, not public constructor callbacks. Keep provider parsing inside the provider files, with small shared pure parsing helpers where genuinely needed.
+- Each concrete subclass fixes `loaderType: MtnMinecraftLoaderType.<provider>` in the base constructor; `doLoadFromWeb()` and `doGenerateMinecraftVersionList(mcVersion, types)` are provider overrides, not public constructor callbacks. Keep provider parsing inside provider files, with small shared pure parsing helpers where genuinely needed.
+- Cache file identity uses `loaderType.name`, preserving the previous Vanilla/Fabric/Forge/NeoForge/Quilt cache filenames. Do not add a `loaderName` compatibility field before the first release.
 - Use `MtnMinecraftError` for cache (1000-range) and download (2000-range) failures. Successful operations use `none(0)`. Expose the typed error plus its numeric code/message; use `VersionList._setError(MtnMinecraftError, [message])` for updates, and include HTTP status details in the message without a separate HTTP status field. Non-fatal failures must not prevent using available catalog data.
 
 ## Naming and architecture
