@@ -206,18 +206,23 @@ Future<void> main(List<String> args) async {
           channel: loaderChannel(version),
         ));
       }
-      // Historical 1.20.1 releases use another Maven artifact coordinate.
-      final legacy = mavenVersions(await list.downloadUrl('$neoLegacyBase/maven-metadata.xml'));
-      for (final version in legacy) {
-        if (!version.startsWith('1.20.1-')) continue;
-        final escaped = Uri.encodeComponent(version);
-        result.add(MtnMinecraftGameLoaderVersion(
-          mcVersion: '1.20.1',
-          version: version,
-          url: '$neoLegacyBase/$escaped/forge-$escaped-installer.jar',
-          type: MtnMinecraftGameVersionType.release,
-          channel: loaderChannel(version),
-        ));
+      // The discontinued 1.20.1 coordinates are optional; losing their
+      // endpoint must not discard the successfully read modern NeoForge list.
+      try {
+        final legacy = mavenVersions(await list.downloadUrl('$neoLegacyBase/maven-metadata.xml'));
+        for (final version in legacy) {
+          if (!version.startsWith('1.20.1-')) continue;
+          final escaped = Uri.encodeComponent(version);
+          result.add(MtnMinecraftGameLoaderVersion(
+            mcVersion: '1.20.1',
+            version: version,
+            url: '$neoLegacyBase/$escaped/forge-$escaped-installer.jar',
+            type: MtnMinecraftGameVersionType.release,
+            channel: loaderChannel(version),
+          ));
+        }
+      } catch (error) {
+        stderr.writeln('Optional NeoForge 1.20.1 metadata unavailable: $error');
       }
       list.sortItems(result);
       return result;
@@ -235,9 +240,12 @@ Future<void> main(List<String> args) async {
     ('NeoForge', versionListNeoForge),
   ]) {
     final catalog = await versionList.load();
+    final catalogError = versionList.error;
+    final catalogErrorMessage = versionList.errorMessage;
     final versions = await versionList.getFromMinecraftVersion(mcVersion);
     stdout.writeln('\n$label — catalog: ${catalog.length} entries | Minecraft: $mcVersion | builds: ${versions.length}');
-    if (versionList.error != MtnMinecraftError.none) stdout.writeln('  Warning [${versionList.errorCode}]: ${versionList.errorMessage}');
+    if (catalogError != MtnMinecraftError.none) stdout.writeln('  Catalog warning [${catalogError.code}]: $catalogErrorMessage');
+    if (versionList.error != MtnMinecraftError.none) stdout.writeln('  Build warning [${versionList.errorCode}]: ${versionList.errorMessage}');
     if (versions.isEmpty) {
       stdout.writeln('  No compatible records (or metadata unavailable).');
       continue;
