@@ -1,5 +1,15 @@
 # Current Target — minecraft_models
 
+## 2026-10-21 — Canonical Minecraft version comparator checkpoint (implementation for Windows validation)
+
+- **Branch:** `feature/shared-minecraft-version-foundation` based on `main` `fd7f72e96be491b90985604166bd2ffea0b5b171`. This scoped implementation is approved for the CP2 prerequisite. **Not merged.**
+- **Public API:** `MtnMinecraftVersion` is exported from `package:minecraft_models/minecraft_models.dart`. It uses the already canonical `MtnMinecraftGameVersionType` (no new enum, no duplicated type identity), accepts an explicit `type` in `parse(raw, type: ...)`, retains exact `raw` and numeric/qualifier fields, `contains(types)`, normalized equality/hash, `Comparable` and four comparison operators.
+- **Ordering:** Only numeric, unqualified `release` IDs support ordering; trailing absent numeric components compare as zero. Snapshots/pre-releases/qualifiers/opaque IDs retain identity but ordering throws `StateError`. No invented snapshot-to-release mapping.
+- **Implementation boundaries:** Pure Dart value model only. No Dart dependencies, provider changes, loader VersionList changes, `mtn_launcher` migration, `minecraft_tools` CP2 implementation, aliases or repo-wide refactors.
+- **Tests:** New `test/minecraft_version_test.dart` covers parse, opaque and qualified versions, 1.21.1/1.21.2/1.21.4/26.1.2 ordering, conservative unsupported ordering and equality/hash. **Not run in Windows yet.** Required: `dart pub get`, `dart analyze`, focused `dart test test/minecraft_version_test.dart -r expanded`, full `dart test`, `git diff --check origin/main...HEAD`, clean `git status -sb`. Never run `dart format`.
+- **Approval gates:** Production implementation approved by the user on 2026-10-21. User acceptance and PR merge require **separate explicit approvals**. Consumers must pin the eventual approved merge SHA before integration.
+- **Prior state:** PR #7 version-list implementation remains merged/Windows-validated; its earlier pinned SHA remains valid for that historical contract.
+
 Date: 2026-10-10
 Repository: `nusretm/minecraft_models`
 Package: `minecraft_models`

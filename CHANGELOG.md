@@ -1,3 +1,8 @@
+## Unreleased — Shared Minecraft version comparator foundation (2026-10-21)
+- Add canonical `MtnMinecraftVersion` public value model, porting existing launcher numeric parsing, exact raw identities, conservative release-only ordering and equality/hash semantics without a new game-type enum.
+- Keep snapshot, pre-release, qualifier and opaque identifiers comparable for identity but not historical ordering.
+- Add focused tests and document separate Windows validation/merge gates. No launcher or Minecraft Tools migration in this checkpoint.
+
 ## Unreleased — Documentation / consumer integration handoff (2026-10-10)
 - Close PR #7 continuity with the actual merge SHA `1c4e346`, successful post-merge Windows `dart analyze`, 40 passing tests, live Vanilla/Fabric/Forge/NeoForge/Quilt metadata results on 1.21.11 and 1.21.1, and completed feature-branch cleanup.
 - Publish `docs/continuity/CONSUMER_INTEGRATION.md` explaining the single public VersionList API, typed loader identity, pinned Git dependency, provider URL differences, cache/error contracts and separate MtnLauncher/Minecraft Tools migrations.
