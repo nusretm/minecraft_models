@@ -4,6 +4,18 @@
 
 **Current status (2026-10-10):** [PR #7](https://github.com/nusretm/minecraft_models/pull/7) is **merged and Windows-validated**. Verified implementation SHA: `1c4e346ed42bf9f15b0259c8efb2f7d3011758a3`. On merged `main`, `dart analyze` returned no issues, `dart test` passed **40/40**, and live metadata discovery succeeded for all five loaders on Minecraft 1.21.11 and 1.21.1. Feature-branch cleanup was completed; this documentation closure does not change Dart code.
 
+## Shared game-version comparison (new checkpoint, not yet merged)
+
+The scoped `feature/shared-minecraft-version-foundation` branch adds `MtnMinecraftVersion` to this package's **public barrel**. It reuses `MtnMinecraftGameVersionType` and conservatively compares only unqualified numeric releases. Version strings and preview identities are preserved; snapshot order is never inferred.
+
+```dart
+final lower = MtnMinecraftVersion.parse('1.21.3', type: MtnMinecraftGameVersionType.release);
+final upper = MtnMinecraftVersion.parse('1.21.4', type: MtnMinecraftGameVersionType.release);
+assert(lower < upper);
+```
+
+This feature has not yet been merged or Windows-validated. Consumers must continue using their currently approved pins until a separate merge/integration checkpoint.
+
 ## The public API
 
 Import from the single supported entry point:
@@ -18,6 +30,7 @@ import 'package:minecraft_models/minecraft_models.dart';
 | `MtnMinecraftGameLoaderVersionList` | **Constructible public facade** for catalogs, Minecraft-compatible loader versions, HTTP, cache and typed errors. |
 | `MtnMinecraftGameLoaderVersion` | Immutable data model: `mcVersion`, exact `version`, source `url`, game `type`, loader `channel`; JSON serialization and display-only `text`. |
 | `MtnMinecraftGameVersionType` | Type of the Minecraft game version (release, snapshot, preview, etc.). |
+| `MtnMinecraftVersion` | New shared game-version value with conservative numeric release comparisons (**feature branch only**). |
 | `MtnMinecraftGameLoaderChannel` | Loader build publication channel; `unknown` is **not** stable. |
 | `MtnMinecraftError` | Metadata/cache diagnostic (`error`, `errorCode`, `errorMessage` on VersionList). |
 
