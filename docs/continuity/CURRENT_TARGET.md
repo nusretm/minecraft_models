@@ -1,13 +1,13 @@
 # Current Target — minecraft_models
 
-## 2026-10-21 — Canonical Minecraft version comparator checkpoint (Windows validated; acceptance pending)
+## 2026-10-21 — Canonical Minecraft version comparator checkpoint (Windows validated; user accepted; merge approval pending)
 
 - **Branch:** `feature/shared-minecraft-version-foundation` based on `main` `fd7f72e96be491b90985604166bd2ffea0b5b171`. This scoped implementation is approved for the CP2 prerequisite. **Not merged.**
 - **Public API:** `MtnMinecraftVersion` is exported from `package:minecraft_models/minecraft_models.dart`. It uses the already canonical `MtnMinecraftGameVersionType` (no new enum, no duplicated type identity), accepts an explicit `type` in `parse(raw, type: ...)`, retains exact `raw` and numeric/qualifier fields, `contains(types)`, normalized equality/hash, `Comparable` and four comparison operators.
 - **Ordering:** Only numeric, unqualified `release` IDs support ordering; trailing absent numeric components compare as zero. Snapshots/pre-releases/qualifiers/opaque IDs retain identity but ordering throws `StateError`. No invented snapshot-to-release mapping.
 - **Implementation boundaries:** Pure Dart value model only. No Dart dependencies, provider changes, loader VersionList changes, `mtn_launcher` migration, `minecraft_tools` CP2 implementation, aliases or repo-wide refactors.
 - **Windows evidence (user-run):** `dart pub get` PASS; `dart analyze` **No issues found!**; focused `dart test test/minecraft_version_test.dart -r expanded` **6/6 PASS**; full `dart test` **46/46 PASS**; `git diff --check origin/main...HEAD` clean; `git status -sb` clean and synchronized to `origin/feature/shared-minecraft-version-foundation`. Four optional dependency package updates were noted by `dart pub get` without blocking resolution. Never run `dart format`. The focused test covers parsing, opaque and qualified versions, 1.21.x/26.1.x release ordering, conservative unsupported ordering and equality/hash.
-- **Approval gates:** Production implementation approved by the user on 2026-10-21. User acceptance and PR merge require **separate explicit approvals**. Consumers must pin the eventual approved merge SHA before integration.
+- **Approval gates:** Production implementation and checkpoint acceptance explicitly approved by the user on 2026-10-21. **PR merge has NOT been approved** and must receive separate explicit approval. Consumers must pin the eventual approved merge SHA before integration.
 - **Prior state:** PR #7 version-list implementation remains merged/Windows-validated; its earlier pinned SHA remains valid for that historical contract.
 
 Date: 2026-10-10
